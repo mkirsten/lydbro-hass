@@ -2,7 +2,7 @@ name: Validate
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
   schedule:
     - cron: "0 6 * * *"
@@ -15,11 +15,15 @@ jobs:
       - name: Hassfest
         uses: home-assistant/actions/hassfest@master
 
-  hacs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: HACS validation
-        uses: hacs/action@main
-        with:
-          category: integration
+  # HACS validation is intentionally disabled while this repo is
+  # private — the hacs/action image can't resolve private repos
+  # reliably, and we're not ready to publish to the HACS index yet.
+  # When the repo goes public AND we want a HACS listing, uncomment:
+  #
+  # hacs:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: hacs/action@main
+  #       with:
+  #         category: integration
