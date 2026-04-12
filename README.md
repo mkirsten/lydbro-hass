@@ -67,6 +67,64 @@ can target a specific bridge when you run more than one:
 - `lydbro.sonos_set_volume` / `lydbro.sonos_adjust_volume` / `lydbro.sonos_join`
 - `lydbro.rescan_discovery`
 
+### How data arrives
+
+This is a **push integration**. Events arrive over a persistent TCP
+connection that the integration holds open to the bridge — there is
+no polling, no `scan_interval` to tune, and no "update every N
+seconds" knob anywhere. When you press a button, the bridge pushes a
+frame, the coordinator forwards it to the right entity, and your
+automation runs. Round-trip is bounded by your LAN latency.
+
+If the TCP link drops (device reboot, Ethernet flap, power cycle) the
+client reconnects automatically with exponential backoff. Entities
+drop to `unavailable` until the first state snapshot arrives on the
+new connection.
+
+### Common use cases
+
+What people actually build with this:
+
+- **BeoRemote One → Sonos**. Play / Pause / Next / Previous / Vol
+  Up / Vol Down mapped to the currently-selected Sonos zone. The
+  bundled [`blueprints/beoremote_media_player.yaml`](blueprints/beoremote_media_player.yaml)
+  wires this up in one click.
+- **BeoRemote One → Samsung Frame TV**. Mode-aware dispatch: in
+  `TV` mode the remote directly controls the Frame via
+  `lydbro.tv_send_key`; in `MUSIC` mode the same buttons drive
+  Sonos instead.
+- **Corner scene buttons → light scenes**. The four corner
+  "scene" buttons on the BeoRemote trigger four different Home
+  Assistant scenes, good for "movie mode" / "reading" / "party" /
+  "off".
+- **Ambient automation triggers**. Low battery, BLE disconnect,
+  safe mode — all surface as device diagnostics + repair
+  notifications, so you get a heads-up without watching logs.
+
+See [`examples/automation-beoremote-control.yaml`](examples/automation-beoremote-control.yaml)
+for a worked end-to-end example that's driving a real setup in the
+wild.
+
+---
+
+## Supported devices
+
+| Device | Firmware | Status |
+|---|---|---|
+| **Lydbro One** | ≥ `0.11.9.3` | Fully supported (active development target) |
+
+The Lydbro One is the ESP32-based bridge with PoE Ethernet + BLE
+that pairs with a Bang & Olufsen BeoRemote One. Earlier Raspberry Pi
+/ BlueZ builds (pre-ESP32) are not supported by this integration —
+they predate the Native TCP transport. If you're on one of those,
+the legacy MQTT path still works and there's a migration guide
+linked below.
+
+Only the **Native TCP v1** transport is wired up. If the bridge's
+config UI has *HA integration* set to MQTT or Webhook, flip it to
+Native TCP before adding the integration. Native TCP must be enabled
+on the device for the integration to connect at all.
+
 ---
 
 ## Installation
@@ -86,6 +144,22 @@ can target a specific bridge when you run more than one:
 1. Copy `custom_components/lydbro/` into your HA `config/custom_components/`
 2. Restart Home Assistant
 3. Add the integration from **Settings → Devices & Services**
+
+### Removing the integration
+
+1. **Settings → Devices & Services → Lydbro**, click the three-dot
+   menu on your bridge entry and choose **Delete**. This removes the
+   config entry, tears down the TCP connection, and unregisters all
+   entities, services, and device triggers for that bridge.
+2. If you installed via HACS and want to remove the integration
+   entirely, go to **HACS → Integrations → Lydbro → ⋮ → Remove** and
+   restart Home Assistant.
+3. Any automations that referenced the deleted entities or device
+   triggers will show up in **Settings → Automations** as
+   *Unavailable* — update or delete them.
+
+The integration doesn't write anything outside HA's own config
+directory, so removing the entry leaves no stray state behind.
 
 ---
 
@@ -184,6 +258,36 @@ scenes — lives in [`examples/automation-beoremote-control.yaml`](examples/auto
     logs:
       custom_components.lydbro: debug
   ```
+
+---
+
+## Known limitations
+
+- **Events drop under extreme burst load.** The bridge's Native TCP
+  server keeps an 8-frame outbound queue per client. If the client
+  can't drain it fast enough (e.g. HA is pegged), the oldest frames
+  are dropped rather than growing the queue unbounded. In normal
+  use this is never hit — button presses are orders of magnitude
+  slower than the drain rate — but if you are generating synthetic
+  floods for testing, expect losses beyond 8 in-flight frames.
+- **Idle timeout is 30 seconds.** The server drops clients that go
+  silent for more than 30 s in both directions. The client pings
+  every 8 s to stay ahead of it, so in practice this only shows up
+  if the network itself stalls for that long — in which case the
+  auto-reconnect loop picks it back up on the next attempt.
+- **Zeroconf discovery is LAN-scoped.** The bridge advertises
+  `_lydbro._tcp.local.`, which only propagates within a broadcast
+  domain. If Home Assistant and the bridge live on different VLANs
+  / subnets, auto-discovery won't find the bridge — add it
+  manually by IP via **+ Add Integration → Lydbro** and the flow
+  will probe it the same way.
+- **BLE is single-remote.** The Lydbro One pairs with exactly one
+  BeoRemote One at a time. Running two remotes into one bridge
+  isn't a software limitation this integration can fix — it's a
+  bridge-side constraint.
+- **No translation beyond English yet.** The entity, error and
+  repair-issue strings ship in English. Swedish / Danish
+  translations are on the roadmap (the Lydbro home turf).
 
 ---
 

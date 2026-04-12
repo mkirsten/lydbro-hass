@@ -1,0 +1,40 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "ble_connected": { "default": "mdi:bluetooth-connect" },
+      "ethernet": { "default": "mdi:ethernet" },
+      "safe_mode": { "default": "mdi:shield-alert" }
+    },
+    "sensor": {
+      "battery": { "default": "mdi:battery" },
+      "boot_phase": { "default": "mdi:progress-clock" },
+      "firmware_version": { "default": "mdi:chip" },
+      "ip_address": { "default": "mdi:ip-network" }
+    },
+    "button": {
+      "reboot": { "default": "mdi:restart" },
+      "rescan_discovery": { "default": "mdi:magnify-scan" },
+      "ble_disconnect": { "default": "mdi:bluetooth-off" }
+    },
+    "event": {
+      "button": { "default": "mdi:gesture-tap-button" },
+      "menu": { "default": "mdi:menu" },
+      "scene": { "default": "mdi:palette-swatch" }
+    },
+    "remote": {
+      "remote": { "default": "mdi:remote" }
+    }
+  },
+  "services": {
+    "send_remote_key": { "service": "mdi:remote" },
+    "tv_send_key": { "service": "mdi:television" },
+    "tv_launch_app": { "service": "mdi:television-play" },
+    "sonos_play_uri": { "service": "mdi:speaker" },
+    "sonos_play_spotify": { "service": "mdi:spotify" },
+    "sonos_play_favorite": { "service": "mdi:star" },
+    "sonos_set_volume": { "service": "mdi:volume-high" },
+    "sonos_adjust_volume": { "service": "mdi:volume-plus" },
+    "sonos_join": { "service": "mdi:speaker-multiple" },
+    "rescan_discovery": { "service": "mdi:magnify-scan" }
+  }
+}

@@ -27,7 +27,7 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **runtime-data** — switched from `hass.data[DOMAIN][entry_id]` to typed `entry.runtime_data: LydbroCoordinator`; services now resolve coordinators via `config_entries.async_entries(DOMAIN)`.
 - [x] **action-exceptions** — `coordinator.async_send_cmd` now translates `LydbroProtocolError` into `HomeAssistantError` with the `cmd_failed` translation key; services and entity actions both benefit
 - [x] **config-flow-test-coverage** — `tests/test_config_flow.py` covers user, zeroconf, discovery_confirm, and reconfigure steps against `FakeLydbroServer`
-- [ ] **docs-removal-instructions** — add a "Removing the integration" section to README
+- [x] **docs-removal-instructions** — README has a "Removing the integration" section under Installation
 
 ## Silver — reliability and production-ready
 
@@ -56,13 +56,13 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **reconfiguration-flow** — `async_step_reconfigure` lets the user update host/port in place; refuses to point an entry at a different physical device (id mismatch)
 - [x] **repair-issues** — `repairs.py` raises HA repair issues for `safe_mode=true` (severity error, learn_more link to the bridge web UI), low battery ≤10% with 15% clear hysteresis, and BLE link down >5 min. Auto-clear when the condition recovers. `tests/test_repairs.py` covers each, including hysteresis and grace-period cancellation. Firmware-version "older than known-good" warning deliberately not implemented — no "known-good minimum" exists yet; add once there's a real floor to enforce.
 - [x] **exception-translations** — `cmd_failed` and `device_not_found` errors use `translation_domain` + `translation_key` + `translation_placeholders`; English strings in `strings.json` and `translations/en.json`
-- [ ] **icon-translations** — ship `icons.json` to override entity icons without hard-coding `_attr_icon` strings (e.g. mdi:remote for the remote entity, mdi:remote-tv for the Button event)
-- [ ] **stale-devices** — N/A (single device per entry), document the N/A decision
-- [ ] **dynamic-devices** — N/A (single device per entry)
-- [ ] **docs-data-update** — short docs section explaining the push model: "events arrive over a persistent TCP connection; there is no polling, and no `scan_interval` to tune"
-- [ ] **docs-known-limitations** — a README section listing: events dropped if the TCP out-queue overflows (8 frames), 30-second server-side idle timeout, zeroconf only within a /24
-- [ ] **docs-supported-devices** — README section listing "Lydbro One" + firmware range
-- [ ] **docs-use-cases** — short README section "What people build with this": BeoRemote → Sonos, BeoRemote → Samsung Frame, scene-corner → light scenes
+- [x] **icon-translations** — `custom_components/lydbro/icons.json` overrides entity and service icons without hard-coding `_attr_icon` strings; covers all five entity platforms plus every service
+- [x] **stale-devices** — N/A. One config entry = one physical bridge = one device. There is no "pool of devices" to mark stale; if the bridge is gone, the user removes the entry. Scale decision: document and move on.
+- [x] **dynamic-devices** — N/A. Same reasoning — devices aren't created or destroyed at runtime; they're created by the config flow.
+- [x] **docs-data-update** — README "How data arrives" subsection explains the push model: persistent TCP, no polling, no scan_interval, auto-reconnect with unavailable during gaps.
+- [x] **docs-known-limitations** — README "Known limitations" section covers 8-frame out-queue drop, 30-s idle timeout, zeroconf LAN-scoped, single-remote BLE, English-only translations.
+- [x] **docs-supported-devices** — README "Supported devices" section lists Lydbro One ≥ 0.11.9.3 and explicitly flags that legacy Pi/BlueZ builds are not supported (migration guide linked).
+- [x] **docs-use-cases** — README "Common use cases" subsection walks through BeoRemote → Sonos, BeoRemote → Samsung Frame, corner-scene lighting, and ambient diagnostics.
 
 ## Platinum — the gold standard, plus typing and async purity
 
