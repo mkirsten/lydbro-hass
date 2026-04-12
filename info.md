@@ -14,5 +14,5 @@ automate your BeoRemote One via a Lydbro One bridge.
   bridge
 - **No cloud, no polling, no YAML required**
 
-See the [README](https://github.com/mkirsten/lydbro-hacs) for full setup
+See the [README](https://github.com/mkirsten/lydbro-hass) for full setup
 and automation examples.

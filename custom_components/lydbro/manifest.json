@@ -5,10 +5,10 @@
   "codeowners": ["@mkirsten"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/mkirsten/lydbro-hacs",
+  "documentation": "https://github.com/mkirsten/lydbro-hass",
   "integration_type": "device",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/mkirsten/lydbro-hacs/issues",
+  "issue_tracker": "https://github.com/mkirsten/lydbro-hass/issues",
   "requirements": [],
   "zeroconf": ["_lydbro._tcp.local."]
 }

@@ -57,7 +57,7 @@ you run more than one.
 ### Via HACS (recommended)
 
 1. In HACS → **Integrations** → ⋮ → **Custom repositories**
-2. Add `https://github.com/mkirsten/lydbro-hacs` as category **Integration**
+2. Add `https://github.com/mkirsten/lydbro-hass` as category **Integration**
 3. Install **Lydbro**
 4. Restart Home Assistant
 5. Your Lydbro One should pop up under **Settings → Devices & Services →
@@ -169,8 +169,8 @@ MIT — see [LICENSE](LICENSE).
 
 [hacs]: https://github.com/hacs/integration
 [hacs-badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg
-[validate]: https://github.com/mkirsten/lydbro-hacs/actions/workflows/validate.yml
-[validate-badge]: https://github.com/mkirsten/lydbro-hacs/actions/workflows/validate.yml/badge.svg
-[release]: https://github.com/mkirsten/lydbro-hacs/releases
-[release-badge]: https://img.shields.io/github/v/release/mkirsten/lydbro-hacs?include_prereleases
+[validate]: https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml
+[validate-badge]: https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml/badge.svg
+[release]: https://github.com/mkirsten/lydbro-hass/releases
+[release-badge]: https://img.shields.io/github/v/release/mkirsten/lydbro-hass?include_prereleases
 [protocol-src]: https://github.com/mkirsten/lydbro-code/blob/master/products/lydbro-one-esp32/adapters/adapter_native_tcp.h
