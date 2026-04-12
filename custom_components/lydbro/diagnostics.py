@@ -8,6 +8,7 @@ Nothing on this device is sensitive (no credentials, no tokens, no
 personal data — just local IPs of Sonos/TVs on the same LAN), so we
 don't redact anything. If that ever changes, redact here.
 """
+
 from __future__ import annotations
 
 from typing import Any

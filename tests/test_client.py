@@ -4,6 +4,7 @@ These run the real client code over a real loopback socket — no
 mocking of the transport. If any of these break, the bridge-side
 protocol or the client's frame handling has regressed.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -14,7 +15,6 @@ import pytest
 from custom_components.lydbro.client import LydbroClient, LydbroProtocolError
 
 from .fake_server import FakeLydbroServer
-
 
 # ---------------------------------------------------------------------------
 # Test-side plumbing
@@ -108,9 +108,7 @@ async def test_server_pushed_event_reaches_on_event(
 ) -> None:
     client, recorder = await _connected_client(fake_server)
     try:
-        await fake_server.push_event(
-            "button_press", name="Play", kind="click", mode="MUSIC"
-        )
+        await fake_server.push_event("button_press", name="Play", kind="click", mode="MUSIC")
         await asyncio.wait_for(recorder.event_event.wait(), 2.0)
 
         assert len(recorder.events) == 1

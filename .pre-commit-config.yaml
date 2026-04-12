@@ -1,0 +1,58 @@
+# Pre-commit runs locally on every `git commit` and in CI as a
+# belt-and-braces check. Install once with:
+#
+#     pip install pre-commit
+#     pre-commit install
+#
+# After that, `git commit` auto-runs the hooks on the staged files
+# only; `pre-commit run --all-files` runs them on the whole tree.
+#
+# The hook stack intentionally mirrors the checks CI already runs
+# (ruff, mypy) so a local commit failing = a CI run failing, and
+# adds cheap file-hygiene checks that aren't worth a dedicated CI
+# job (trailing whitespace, end-of-file, JSON/YAML validity).
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        # HA blueprints use the custom !input tag which PyYAML's
+        # safe_load doesn't know about. --unsafe makes check-yaml
+        # call full_load, which tolerates unknown tags.
+        args: ["--unsafe"]
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.4
+    hooks:
+      # Lint rules match pyproject.toml [tool.ruff.lint]
+      - id: ruff
+        args: ["--fix"]
+      # Auto-format; keeps diffs noise-free
+      - id: ruff-format
+
+  # Run mypy via the project venv (language: system) instead of
+  # pre-commit's isolated env. Reason: the isolated env resolves its
+  # own homeassistant version independently of the one in
+  # requirements-dev.txt, and HA's mypy-visible API surface changes
+  # between versions (e.g. dataclass __replace__ overrides in 3.13).
+  # Using the system mypy keeps local + CI + the test suite all
+  # pointed at the same HA version, which is the whole point of
+  # having requirements-dev.txt pin it in the first place.
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (project venv)
+        entry: .venv/bin/python -m mypy
+        language: system
+        types: [python]
+        files: ^custom_components/lydbro/
+        pass_filenames: false

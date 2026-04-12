@@ -16,6 +16,7 @@ The HA-side fixtures (``hass``, ``mock_config_entry``, ...) are
 provided by ``pytest-homeassistant-custom-component`` and don't need
 re-exporting here.
 """
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator

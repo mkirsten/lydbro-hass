@@ -1,4 +1,5 @@
 """Coordinator — owns the TCP client and fans out state/events to entities."""
+
 from __future__ import annotations
 
 import logging
@@ -11,7 +12,6 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .client import CONNECT_TIMEOUT, LydbroClient, LydbroProtocolError
-from .repairs import LydbroIssueMonitor
 from .const import (
     DOMAIN,
     EVENT_BUS_BUTTON,
@@ -22,6 +22,7 @@ from .const import (
     SIGNAL_EVENT,
     SIGNAL_STATE_UPDATED,
 )
+from .repairs import LydbroIssueMonitor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def _coerce_numeric(key: str, value: Any) -> Any:
     """
     if key not in NUMERIC_STATE_KEYS or value is None:
         return value
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return value
     if isinstance(value, str):
         try:
@@ -64,7 +65,7 @@ class LydbroCoordinator:
     using the per-entry signals in :mod:`.const`.
     """
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry[Any]) -> None:
         self.hass = hass
         self.entry = entry
         self.host: str = entry.data["host"]
@@ -165,9 +166,7 @@ class LydbroCoordinator:
         snapshot = {k: v for k, v in frame.items() if k != "t"}
         self.state = _normalize_state(snapshot)
         self.available = True
-        async_dispatcher_send(
-            self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
-        )
+        async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id))
         self._issue_monitor.evaluate()
 
     async def _handle_event(self, frame: dict[str, Any]) -> None:
@@ -182,23 +181,17 @@ class LydbroCoordinator:
             value = frame.get("value")
             if isinstance(name, str):
                 self.state[name] = _coerce_numeric(name, value)
-                async_dispatcher_send(
-                    self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
-                )
+                async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id))
                 self._issue_monitor.evaluate()
 
         if etype == "boot_phase":
             phase = frame.get("phase")
             if isinstance(phase, str):
                 self.state["boot_phase"] = phase
-                async_dispatcher_send(
-                    self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
-                )
+                async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id))
 
         # Fan out to dispatcher listeners (event entities).
-        async_dispatcher_send(
-            self.hass, SIGNAL_EVENT.format(self.entry.entry_id), frame
-        )
+        async_dispatcher_send(self.hass, SIGNAL_EVENT.format(self.entry.entry_id), frame)
 
         # Fire HA bus events for button / menu / scene presses. This is
         # how device triggers attach — they register an "event" trigger
@@ -220,9 +213,5 @@ class LydbroCoordinator:
         self.available = connected
         if not connected:
             _LOGGER.info("lydbro %s disconnected, will reconnect", self.host)
-        async_dispatcher_send(
-            self.hass, SIGNAL_CONNECTION.format(self.entry.entry_id), connected
-        )
-        async_dispatcher_send(
-            self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
-        )
+        async_dispatcher_send(self.hass, SIGNAL_CONNECTION.format(self.entry.entry_id), connected)
+        async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id))

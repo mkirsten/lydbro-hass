@@ -1,4 +1,5 @@
 """The Lydbro integration."""
+
 from __future__ import annotations
 
 import logging
@@ -45,7 +46,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: LydbroConfigEntry) -> b
     if unload_ok:
         await entry.runtime_data.async_stop()
         # Unregister the global services when the last entry unloads.
-        remaining = [e for e in hass.config_entries.async_entries(DOMAIN) if e.entry_id != entry.entry_id]
+        remaining = [
+            e for e in hass.config_entries.async_entries(DOMAIN) if e.entry_id != entry.entry_id
+        ]
         if not remaining:
             async_unregister_services(hass)
     return unload_ok

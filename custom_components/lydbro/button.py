@@ -1,4 +1,5 @@
 """Button platform — admin-style buttons for reboot and rescan."""
+
 from __future__ import annotations
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
@@ -47,9 +48,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = entry.runtime_data
-    async_add_entities(
-        LydbroButton(coordinator, desc, cmd) for desc, cmd in BUTTONS
-    )
+    async_add_entities(LydbroButton(coordinator, desc, cmd) for desc, cmd in BUTTONS)
 
 
 class LydbroButton(LydbroEntity, ButtonEntity):

@@ -8,6 +8,7 @@ server replies with a `result` frame carrying the same id.
 
 See docs/native_tcp_protocol.md in the firmware repo for the full spec.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -86,9 +87,7 @@ class LydbroClient:
         if self._runner is not None:
             return
         self._stop.clear()
-        self._runner = asyncio.create_task(
-            self._run(), name=f"lydbro-{self._host}"
-        )
+        self._runner = asyncio.create_task(self._run(), name=f"lydbro-{self._host}")
 
     async def stop(self) -> None:
         """Stop the client and close the socket."""
@@ -109,7 +108,7 @@ class LydbroClient:
         try:
             await asyncio.wait_for(self._connected.wait(), timeout)
             return True
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return False
 
     # ------------------------------------------------------------------
@@ -137,7 +136,7 @@ class LydbroClient:
         try:
             await self._write_json(payload)
             return await asyncio.wait_for(fut, CMD_TIMEOUT)
-        except asyncio.TimeoutError as err:
+        except TimeoutError as err:
             raise LydbroProtocolError(f"cmd {cmd} timed out") from err
         finally:
             self._pending.pop(cmd_id, None)
@@ -155,9 +154,7 @@ class LydbroClient:
             except asyncio.CancelledError:
                 raise
             except Exception as err:  # noqa: BLE001 — resilient loop
-                _LOGGER.debug(
-                    "lydbro %s:%d connection error: %s", self._host, self._port, err
-                )
+                _LOGGER.debug("lydbro %s:%d connection error: %s", self._host, self._port, err)
             finally:
                 await self._mark_disconnected()
 
@@ -184,10 +181,8 @@ class LydbroClient:
         assert self._reader is not None
         while not self._stop.is_set():
             try:
-                raw = await asyncio.wait_for(
-                    self._reader.readline(), READ_TIMEOUT
-                )
-            except asyncio.TimeoutError as err:
+                raw = await asyncio.wait_for(self._reader.readline(), READ_TIMEOUT)
+            except TimeoutError as err:
                 raise LydbroProtocolError("read timeout") from err
 
             if not raw:
@@ -236,9 +231,7 @@ class LydbroClient:
                 if frame.get("ok"):
                     fut.set_result(frame)
                 else:
-                    fut.set_exception(
-                        LydbroProtocolError(frame.get("error") or "cmd failed")
-                    )
+                    fut.set_exception(LydbroProtocolError(frame.get("error") or "cmd failed"))
             return
 
         if ftype == "error":

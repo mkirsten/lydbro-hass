@@ -19,6 +19,7 @@ users see them without having to trawl through logs:
 and evaluated on every state update, plus on a timer for the BLE
 grace period.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -35,8 +36,8 @@ if TYPE_CHECKING:
 
 # Tunable thresholds. Kept at module scope so tests can monkeypatch
 # them without reaching into a class.
-LOW_BATTERY_THRESHOLD = 10   # %  — raise at or below this
-LOW_BATTERY_CLEAR = 15       # %  — clear once we recover past this
+LOW_BATTERY_THRESHOLD = 10  # %  — raise at or below this
+LOW_BATTERY_CLEAR = 15  # %  — clear once we recover past this
 BLE_DOWN_GRACE_SECONDS = 300  # 5 min — ignore short wake-ups
 
 
@@ -48,7 +49,7 @@ def _issue_id(kind: str, device_id: str) -> str:
 class LydbroIssueMonitor:
     """Raises and clears HA repair issues based on coordinator state."""
 
-    def __init__(self, hass: HomeAssistant, coordinator: "LydbroCoordinator") -> None:
+    def __init__(self, hass: HomeAssistant, coordinator: LydbroCoordinator) -> None:
         self._hass = hass
         self._coordinator = coordinator
 
@@ -93,8 +94,7 @@ class LydbroIssueMonitor:
                 severity=ir.IssueSeverity.ERROR,
                 translation_key="safe_mode",
                 translation_placeholders={
-                    "name": self._coordinator.hello.get("name")
-                    or self._coordinator.entry.title,
+                    "name": self._coordinator.hello.get("name") or self._coordinator.entry.title,
                     "host": self._coordinator.host,
                 },
                 learn_more_url=f"http://{self._coordinator.host}/",
@@ -105,7 +105,7 @@ class LydbroIssueMonitor:
     def _check_low_battery(self, state: dict[str, Any]) -> None:
         issue_id = _issue_id("low_battery", self._coordinator.device_id)
         battery = state.get("battery")
-        if not isinstance(battery, (int, float)):
+        if not isinstance(battery, int | float):
             return
         # Hysteresis: the issue can only become active below the
         # lower threshold, and can only clear above the higher one.
@@ -141,9 +141,7 @@ class LydbroIssueMonitor:
         # grace-period timer that will raise the issue if the link
         # stays down for BLE_DOWN_GRACE_SECONDS.
         if self._ble_down_task is None or self._ble_down_task.done():
-            self._ble_down_task = self._hass.async_create_task(
-                self._ble_grace_period(issue_id)
-            )
+            self._ble_down_task = self._hass.async_create_task(self._ble_grace_period(issue_id))
 
     async def _ble_grace_period(self, issue_id: str) -> None:
         try:

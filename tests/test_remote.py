@@ -9,14 +9,17 @@ One as a HA remote:
 * ``remote.turn_off`` issues ``ble_disconnect``; ``turn_on`` is a
   no-op (the bridge auto-reconnects when the remote wakes).
 """
+
 from __future__ import annotations
 
 from homeassistant.components.remote import (
     ATTR_COMMAND,
-    DOMAIN as REMOTE_DOMAIN,
     SERVICE_SEND_COMMAND,
     SERVICE_TURN_OFF,
     SERVICE_TURN_ON,
+)
+from homeassistant.components.remote import (
+    DOMAIN as REMOTE_DOMAIN,
 )
 from homeassistant.const import ATTR_ENTITY_ID, CONF_HOST, CONF_PORT, STATE_ON
 from homeassistant.core import HomeAssistant
@@ -25,7 +28,6 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.lydbro.const import DOMAIN
 
 from .fake_server import FakeLydbroServer
-
 
 REMOTE_ENTITY_ID = "remote.test_lydbro_one_beoremote"
 
@@ -100,9 +102,7 @@ async def test_remote_turn_off_issues_ble_disconnect(
     assert fake_server.received_cmds[0]["cmd"] == "ble_disconnect"
 
 
-async def test_remote_turn_on_is_no_op(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> None:
+async def test_remote_turn_on_is_no_op(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
     """turn_on has no firmware cmd — it's a user-facing hint, no-op under the hood."""
     await _setup(hass, fake_server)
 

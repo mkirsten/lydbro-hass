@@ -12,10 +12,10 @@ These verify the pieces :class:`LydbroCoordinator` layers on top of
   the corresponding HA bus events (``lydbro_button`` etc.) carrying
   the HA device_id — this is the load-bearing hook for device triggers.
 """
+
 from __future__ import annotations
 
 import asyncio
-from typing import Any
 
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import Event, HomeAssistant, callback
@@ -117,9 +117,7 @@ async def test_boot_phase_event_updates_state(
     _, coordinator = await _setup(hass, fake_server)
 
     await fake_server.push_event("boot_phase", phase="Discovering devices")
-    await _wait_for(
-        lambda: coordinator.state.get("boot_phase") == "Discovering devices"
-    )
+    await _wait_for(lambda: coordinator.state.get("boot_phase") == "Discovering devices")
 
 
 # ---------------------------------------------------------------------------
@@ -137,9 +135,9 @@ async def test_button_press_fires_lydbro_button_bus_event(
     # coordinator stamps into event data.
     from homeassistant.helpers import device_registry as dr
 
-    ha_device_id = dr.async_get(hass).async_get_device(
-        identifiers={(DOMAIN, "aa:bb:cc:dd:ee:ff")}
-    ).id
+    ha_device_id = (
+        dr.async_get(hass).async_get_device(identifiers={(DOMAIN, "aa:bb:cc:dd:ee:ff")}).id
+    )
 
     captured: list[Event] = []
 
@@ -149,9 +147,7 @@ async def test_button_press_fires_lydbro_button_bus_event(
 
     hass.bus.async_listen(EVENT_BUS_BUTTON, _listener)
 
-    await fake_server.push_event(
-        "button_press", name="Play", kind="click", mode="MUSIC"
-    )
+    await fake_server.push_event("button_press", name="Play", kind="click", mode="MUSIC")
     await _wait_for(lambda: len(captured) == 1)
 
     event = captured[0]
@@ -185,9 +181,7 @@ async def test_scene_button_fires_lydbro_scene_bus_event(
     captured: list[Event] = []
     hass.bus.async_listen(EVENT_BUS_SCENE, lambda e: captured.append(e))
 
-    await fake_server.push_event(
-        "scene_button", name="TopLeft", position="top_left", mode="MUSIC"
-    )
+    await fake_server.push_event("scene_button", name="TopLeft", position="top_left", mode="MUSIC")
     await _wait_for(lambda: len(captured) == 1)
 
     assert captured[0].data["position"] == "top_left"

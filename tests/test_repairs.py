@@ -10,6 +10,7 @@ coordinator + fake bridge:
 * ble_disconnected only fires after the grace period elapses; a
   reconnect before then cancels the timer silently.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -52,9 +53,7 @@ async def _setup(
 
 
 def _issue(hass: HomeAssistant, kind: str) -> ir.IssueEntry | None:
-    return ir.async_get(hass).async_get_issue(
-        DOMAIN, f"{kind}_aa:bb:cc:dd:ee:ff"
-    )
+    return ir.async_get(hass).async_get_issue(DOMAIN, f"{kind}_aa:bb:cc:dd:ee:ff")
 
 
 async def _wait_for(predicate, timeout: float = 1.0) -> None:
@@ -101,9 +100,7 @@ async def test_no_safe_mode_issue_when_healthy(
 # ---------------------------------------------------------------------------
 
 
-async def test_low_battery_hysteresis(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> None:
+async def test_low_battery_hysteresis(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
     """The issue raises below 10, stays put between 10–15, clears above 15."""
     _, _ = await _setup(hass, fake_server, battery=50)
     assert _issue(hass, "low_battery") is None
@@ -153,9 +150,7 @@ async def test_ble_disconnected_waits_for_grace_period(
     await _setup(hass, fake_server, ble_connected=False)
 
     # Wait past the grace period → issue raised.
-    await _wait_for(
-        lambda: _issue(hass, "ble_disconnected") is not None, timeout=2.0
-    )
+    await _wait_for(lambda: _issue(hass, "ble_disconnected") is not None, timeout=2.0)
     issue = _issue(hass, "ble_disconnected")
     assert issue is not None
     assert issue.severity == ir.IssueSeverity.WARNING

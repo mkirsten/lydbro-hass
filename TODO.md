@@ -127,7 +127,7 @@ gating:** `test_remote.py` (async_send_command forwarding, async_turn_off),
 ## Quality-of-life items outside the scale
 
 - [x] **`pyproject.toml`** with pytest + ruff configs (mypy config still pending under Platinum strict-typing)
-- [ ] **Pre-commit hooks** — ruff, mypy, black/ruff-format, yaml-lint
+- [x] **Pre-commit hooks** — `.pre-commit-config.yaml` runs ruff lint + ruff-format, mypy (via the project venv, not an isolated one, so the HA version matches CI), and file-hygiene hooks (trailing whitespace, EOF, check-yaml/json, merge conflicts, large files, line endings). Install with `pre-commit install` after `pip install -r requirements-dev.txt`.
 - [ ] **Screenshot in README** of the integration card + device page
 - [ ] **Translations beyond English** — Swedish, Danish (the Lydbro home turf)
 - [ ] **README badges** for quality scale tier once we hit one

@@ -12,12 +12,11 @@ loopback socket, so ``_probe`` is exercised end-to-end. The only thing
 mocked is mDNS discovery info, because that comes from ``hass``'s
 zeroconf helper and never touches our code path.
 """
+
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import patch
 
-import pytest
 from homeassistant.config_entries import SOURCE_USER, SOURCE_ZEROCONF
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
@@ -28,7 +27,6 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.lydbro.const import DOMAIN
 
 from .fake_server import FakeLydbroServer
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -76,13 +74,9 @@ async def _existing_entry(
 # ---------------------------------------------------------------------------
 
 
-async def test_user_flow_happy_path(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> None:
+async def test_user_flow_happy_path(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
     """User types a valid host → flow probes → entry is created."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -104,16 +98,12 @@ async def test_user_flow_happy_path(
 
 async def test_user_flow_cannot_connect(hass: HomeAssistant, socket_enabled) -> None:
     """No server listening → flow shows cannot_connect, stays on user step."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
 
     # Point at a port that will refuse the connection. Port 1 is
     # reserved and tcpmux is never running in CI, so the probe fails
     # inside CONNECT_TIMEOUT without actually hanging.
-    with patch(
-        "custom_components.lydbro.config_flow.CONNECT_TIMEOUT", 0.3
-    ):
+    with patch("custom_components.lydbro.config_flow.CONNECT_TIMEOUT", 0.3):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {CONF_HOST: "127.0.0.1", CONF_PORT: 1},
@@ -130,9 +120,7 @@ async def test_user_flow_already_configured(
     """Adding a device that's already configured aborts and updates host/port."""
     await _existing_entry(hass, host="10.0.0.1", port=9999)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {CONF_HOST: "127.0.0.1", CONF_PORT: fake_server.port},
@@ -150,9 +138,7 @@ async def test_user_flow_already_configured(
 # ---------------------------------------------------------------------------
 
 
-async def test_zeroconf_flow_happy_path(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> None:
+async def test_zeroconf_flow_happy_path(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
     """Zeroconf hit → discovery_confirm form → user confirms → entry created."""
     discovery = _zeroconf_info(
         host="127.0.0.1",
@@ -168,9 +154,7 @@ async def test_zeroconf_flow_happy_path(
     assert result["step_id"] == "discovery_confirm"
     assert result["description_placeholders"]["name"] == "Lab Lydbro One"
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {}
-    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
     assert result["type"] == FlowResultType.CREATE_ENTRY
     assert result["title"] == "Lab Lydbro One"
     assert result["data"][CONF_HOST] == "127.0.0.1"
@@ -218,12 +202,8 @@ async def test_zeroconf_confirm_cannot_connect(
     # Kill the bridge before the user confirms.
     await fake_server.stop()
 
-    with patch(
-        "custom_components.lydbro.config_flow.CONNECT_TIMEOUT", 0.3
-    ):
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], {}
-        )
+    with patch("custom_components.lydbro.config_flow.CONNECT_TIMEOUT", 0.3):
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
 
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "discovery_confirm"
@@ -235,9 +215,7 @@ async def test_zeroconf_confirm_cannot_connect(
 # ---------------------------------------------------------------------------
 
 
-async def test_reconfigure_happy_path(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> None:
+async def test_reconfigure_happy_path(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
     """Reconfigure updates host/port on an existing entry when id matches."""
     entry = await _existing_entry(hass, host="10.0.0.99", port=1234)
 
@@ -263,9 +241,7 @@ async def test_reconfigure_cannot_connect(hass: HomeAssistant, socket_enabled) -
     entry = await _existing_entry(hass, host="10.0.0.99", port=1234)
 
     result = await entry.start_reconfigure_flow(hass)
-    with patch(
-        "custom_components.lydbro.config_flow.CONNECT_TIMEOUT", 0.3
-    ):
+    with patch("custom_components.lydbro.config_flow.CONNECT_TIMEOUT", 0.3):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {CONF_HOST: "127.0.0.1", CONF_PORT: 1},
@@ -282,13 +258,9 @@ async def test_reconfigure_cannot_connect(hass: HomeAssistant, socket_enabled) -
     assert refreshed.data[CONF_PORT] == 1234
 
 
-async def test_reconfigure_wrong_device(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> None:
+async def test_reconfigure_wrong_device(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
     """Pointing at a different physical device is refused, not silently accepted."""
-    entry = await _existing_entry(
-        hass, host="10.0.0.99", port=1234, device_id="de:ad:be:ef:00:01"
-    )
+    entry = await _existing_entry(hass, host="10.0.0.99", port=1234, device_id="de:ad:be:ef:00:01")
 
     result = await entry.start_reconfigure_flow(hass)
     # The fake server's hello id is aa:bb:... — a different device.

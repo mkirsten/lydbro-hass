@@ -12,17 +12,16 @@ Each trigger type translates to an ``event`` platform trigger under the
 hood, matching the HA bus events fired from :class:`LydbroCoordinator`
 on ``button_press`` / ``menu_selection`` / ``scene_button`` frames.
 """
+
 from __future__ import annotations
 
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.components.device_automation import DEVICE_TRIGGER_BASE_SCHEMA
 from homeassistant.components.homeassistant.triggers import event as event_trigger
 from homeassistant.const import CONF_DEVICE_ID, CONF_DOMAIN, CONF_PLATFORM, CONF_TYPE
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant
-from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.trigger import TriggerActionType, TriggerInfo
 from homeassistant.helpers.typing import ConfigType
 
@@ -54,10 +53,7 @@ def _button_trigger_types() -> list[str]:
 
 
 def _scene_trigger_types() -> list[str]:
-    return [
-        f"scene_{pos}"
-        for pos in ("top_left", "top_right", "bottom_left", "bottom_right")
-    ]
+    return [f"scene_{pos}" for pos in ("top_left", "top_right", "bottom_left", "bottom_right")]
 
 
 TRIGGER_TYPES: frozenset[str] = frozenset(
@@ -71,9 +67,7 @@ TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
 )
 
 
-async def async_get_triggers(
-    hass: HomeAssistant, device_id: str
-) -> list[dict[str, Any]]:
+async def async_get_triggers(hass: HomeAssistant, device_id: str) -> list[dict[str, Any]]:
     """List the triggers available for this device."""
     return [
         {

@@ -1,4 +1,5 @@
 """Base entity for Lydbro — shared device_info + dispatcher plumbing."""
+
 from __future__ import annotations
 
 from homeassistant.core import callback

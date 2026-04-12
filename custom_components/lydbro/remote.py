@@ -12,6 +12,7 @@ Commands map one-to-one to :data:`const.KNOWN_BUTTONS`. Unknown command
 names are passed through to the firmware — it will reject them if they
 aren't valid, and the service call will raise.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -73,9 +74,7 @@ class LydbroRemote(LydbroEntity, RemoteEntity):
         """Turn-off drops the current BLE link."""
         await self.coordinator.async_send_cmd("ble_disconnect")
 
-    async def async_send_command(
-        self, command: Iterable[str], **kwargs: Any
-    ) -> None:
+    async def async_send_command(self, command: Iterable[str], **kwargs: Any) -> None:
         """Inject virtual remote key presses.
 
         Each string in ``command`` is forwarded to the firmware as

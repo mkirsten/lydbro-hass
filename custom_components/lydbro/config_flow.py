@@ -1,4 +1,5 @@
 """Config flow for Lydbro."""
+
 from __future__ import annotations
 
 import asyncio
@@ -6,7 +7,6 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
@@ -46,7 +46,7 @@ async def _probe(host: str, port: int) -> dict[str, Any]:
     try:
         try:
             await asyncio.wait_for(done.wait(), CONNECT_TIMEOUT + 2.0)
-        except asyncio.TimeoutError as err:
+        except TimeoutError as err:
             raise LydbroProtocolError("no hello") from err
     finally:
         await client.stop()
@@ -64,9 +64,7 @@ class LydbroConfigFlow(ConfigFlow, domain=DOMAIN):
         self._device_id: str | None = None
         self._name: str | None = None
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Manual entry: user types the device IP or hostname."""
         errors: dict[str, str] = {}
         if user_input is not None:
@@ -80,9 +78,7 @@ class LydbroConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 device_id = hello.get("id") or host
                 await self.async_set_unique_id(device_id)
-                self._abort_if_unique_id_configured(
-                    updates={CONF_HOST: host, CONF_PORT: port}
-                )
+                self._abort_if_unique_id_configured(updates={CONF_HOST: host, CONF_PORT: port})
                 return self.async_create_entry(
                     title=hello.get("name") or "Lydbro One",
                     data={
@@ -99,9 +95,7 @@ class LydbroConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
             }
         )
-        return self.async_show_form(
-            step_id="user", data_schema=schema, errors=errors
-        )
+        return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
@@ -144,18 +138,12 @@ class LydbroConfigFlow(ConfigFlow, domain=DOMAIN):
         schema = vol.Schema(
             {
                 vol.Required(CONF_HOST, default=entry.data.get(CONF_HOST, "")): str,
-                vol.Optional(
-                    CONF_PORT, default=entry.data.get(CONF_PORT, DEFAULT_PORT)
-                ): int,
+                vol.Optional(CONF_PORT, default=entry.data.get(CONF_PORT, DEFAULT_PORT)): int,
             }
         )
-        return self.async_show_form(
-            step_id="reconfigure", data_schema=schema, errors=errors
-        )
+        return self.async_show_form(step_id="reconfigure", data_schema=schema, errors=errors)
 
-    async def async_step_zeroconf(
-        self, discovery_info: ZeroconfServiceInfo
-    ) -> ConfigFlowResult:
+    async def async_step_zeroconf(self, discovery_info: ZeroconfServiceInfo) -> ConfigFlowResult:
         """Handle zeroconf discovery of _lydbro._tcp."""
         host = discovery_info.host
         port = discovery_info.port or DEFAULT_PORT
@@ -164,9 +152,7 @@ class LydbroConfigFlow(ConfigFlow, domain=DOMAIN):
         name = props.get("name") or "Lydbro One"
 
         await self.async_set_unique_id(device_id)
-        self._abort_if_unique_id_configured(
-            updates={CONF_HOST: host, CONF_PORT: port}
-        )
+        self._abort_if_unique_id_configured(updates={CONF_HOST: host, CONF_PORT: port})
 
         self._host = host
         self._port = port

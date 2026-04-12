@@ -1,8 +1,10 @@
 """Binary sensor platform for Lydbro."""
+
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -57,9 +59,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = entry.runtime_data
-    async_add_entities(
-        LydbroBinarySensor(coordinator, desc) for desc in BINARY_SENSORS
-    )
+    async_add_entities(LydbroBinarySensor(coordinator, desc) for desc in BINARY_SENSORS)
 
 
 class LydbroBinarySensor(LydbroEntity, BinarySensorEntity):

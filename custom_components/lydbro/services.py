@@ -4,20 +4,20 @@ All services take a ``device_id`` (HA device registry id) to identify
 which Lydbro One they target. A single HA instance can manage several
 Lydbro bridges, so we can't default to "the" device.
 """
-from __future__ import annotations
 
-import voluptuous as vol
+from __future__ import annotations
 
 from typing import Any
 
+import voluptuous as vol
 from homeassistant.const import ATTR_DEVICE_ID
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN
 from .coordinator import LydbroCoordinator
-
 
 SERVICE_SEND_REMOTE_KEY = "send_remote_key"
 SERVICE_TV_SEND_KEY = "tv_send_key"
@@ -31,9 +31,7 @@ SERVICE_SONOS_JOIN = "sonos_join"
 SERVICE_RESCAN_DISCOVERY = "rescan_discovery"
 
 
-_DEVICE_SCHEMA = vol.Schema(
-    {vol.Required(ATTR_DEVICE_ID): cv.string}, extra=vol.ALLOW_EXTRA
-)
+_DEVICE_SCHEMA = vol.Schema({vol.Required(ATTR_DEVICE_ID): cv.string}, extra=vol.ALLOW_EXTRA)
 
 
 def _coordinator_for(hass: HomeAssistant, call: ServiceCall) -> LydbroCoordinator:
@@ -171,17 +169,13 @@ def async_register_services(hass: HomeAssistant) -> None:
         DOMAIN,
         SERVICE_SONOS_PLAY_URI,
         sonos_play_uri,
-        schema=_schema(
-            {vol.Required("uri"): cv.string, vol.Optional("device_ip"): cv.string}
-        ),
+        schema=_schema({vol.Required("uri"): cv.string, vol.Optional("device_ip"): cv.string}),
     )
     hass.services.async_register(
         DOMAIN,
         SERVICE_SONOS_PLAY_SPOTIFY,
         sonos_play_spotify,
-        schema=_schema(
-            {vol.Required("uri"): cv.string, vol.Optional("device_ip"): cv.string}
-        ),
+        schema=_schema({vol.Required("uri"): cv.string, vol.Optional("device_ip"): cv.string}),
     )
     hass.services.async_register(
         DOMAIN,
@@ -200,9 +194,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         sonos_set_volume,
         schema=_schema(
             {
-                vol.Required("volume"): vol.All(
-                    vol.Coerce(int), vol.Range(min=0, max=100)
-                ),
+                vol.Required("volume"): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional("device_ip"): cv.string,
             }
         ),
@@ -213,9 +205,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         sonos_adjust_volume,
         schema=_schema(
             {
-                vol.Required("delta"): vol.All(
-                    vol.Coerce(int), vol.Range(min=-50, max=50)
-                ),
+                vol.Required("delta"): vol.All(vol.Coerce(int), vol.Range(min=-50, max=50)),
                 vol.Optional("device_ip"): cv.string,
             }
         ),

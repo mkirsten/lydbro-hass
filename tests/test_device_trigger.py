@@ -7,10 +7,10 @@ verify that mapping end-to-end — register a trigger, fire the
 matching bus event from the fake bridge, and assert the automation
 action runs.
 """
+
 from __future__ import annotations
 
 import asyncio
-from typing import Any
 
 import pytest
 from homeassistant.components import automation
@@ -30,9 +30,7 @@ from custom_components.lydbro.const import DOMAIN
 from .fake_server import FakeLydbroServer
 
 
-async def _setup_and_device_id(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> str:
+async def _setup_and_device_id(hass: HomeAssistant, fake_server: FakeLydbroServer) -> str:
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id="aa:bb:cc:dd:ee:ff",
@@ -47,16 +45,12 @@ async def _setup_and_device_id(
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    device = dr.async_get(hass).async_get_device(
-        identifiers={(DOMAIN, "aa:bb:cc:dd:ee:ff")}
-    )
+    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, "aa:bb:cc:dd:ee:ff")})
     assert device is not None
     return device.id
 
 
-async def _wait_for_calls(
-    calls: list[ServiceCall], expected: int, timeout: float = 2.0
-) -> None:
+async def _wait_for_calls(calls: list[ServiceCall], expected: int, timeout: float = 2.0) -> None:
     """Wait until ``calls`` has ``expected`` entries or timeout.
 
     The chain push_event → socket → read loop → coordinator → bus →
@@ -69,9 +63,7 @@ async def _wait_for_calls(
         if len(calls) >= expected:
             return
         await asyncio.sleep(0.02)
-    raise AssertionError(
-        f"expected {expected} service calls, got {len(calls)}"
-    )
+    raise AssertionError(f"expected {expected} service calls, got {len(calls)}")
 
 
 @pytest.fixture
@@ -154,23 +146,17 @@ async def test_button_trigger_fires_automation(
     await hass.async_block_till_done()
 
     # Wrong kind — should not fire.
-    await fake_server.push_event(
-        "button_press", name="Play", kind="hold", mode="MUSIC"
-    )
+    await fake_server.push_event("button_press", name="Play", kind="hold", mode="MUSIC")
     await asyncio.sleep(0.05)
     assert service_calls == []
 
     # Wrong name — should not fire.
-    await fake_server.push_event(
-        "button_press", name="Next", kind="click", mode="MUSIC"
-    )
+    await fake_server.push_event("button_press", name="Next", kind="click", mode="MUSIC")
     await asyncio.sleep(0.05)
     assert service_calls == []
 
     # Matching frame — should fire exactly once.
-    await fake_server.push_event(
-        "button_press", name="Play", kind="click", mode="MUSIC"
-    )
+    await fake_server.push_event("button_press", name="Play", kind="click", mode="MUSIC")
     await _wait_for_calls(service_calls, 1)
 
 
@@ -201,15 +187,11 @@ async def test_scene_trigger_fires_automation(
     )
     await hass.async_block_till_done()
 
-    await fake_server.push_event(
-        "scene_button", name="Morning", position="top_right", mode="MUSIC"
-    )
+    await fake_server.push_event("scene_button", name="Morning", position="top_right", mode="MUSIC")
     await asyncio.sleep(0.05)
     assert service_calls == []
 
-    await fake_server.push_event(
-        "scene_button", name="Morning", position="top_left", mode="MUSIC"
-    )
+    await fake_server.push_event("scene_button", name="Morning", position="top_left", mode="MUSIC")
     await _wait_for_calls(service_calls, 1)
 
 

@@ -13,6 +13,7 @@ Three event entities are created per device:
 Device triggers in :mod:`.device_trigger` build a nicer automation-
 editor UX on top of these entities.
 """
+
 from __future__ import annotations
 
 from typing import Any

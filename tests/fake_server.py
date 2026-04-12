@@ -20,6 +20,7 @@ Protocol (line-delimited JSON, one frame per line, UTF-8):
 
 See ``custom_components/lydbro/client.py`` for the reference client.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -73,7 +74,7 @@ class FakeLydbroServer:
         self.cmd_handler: CmdHandler | None = None
 
         # Assertion-friendly history:
-        self.acked = asyncio.Event()           # set when client sends hello_ack
+        self.acked = asyncio.Event()  # set when client sends hello_ack
         self.received_cmds: list[dict[str, Any]] = []
         self.received_pongs = 0
 
@@ -100,9 +101,7 @@ class FakeLydbroServer:
         return sock.getsockname()[1]
 
     async def start(self) -> None:
-        self._server = await asyncio.start_server(
-            self._handle_client, host="127.0.0.1", port=0
-        )
+        self._server = await asyncio.start_server(self._handle_client, host="127.0.0.1", port=0)
 
     async def stop(self) -> None:
         # Cancel any in-flight cmd handlers first — they may be

@@ -10,12 +10,14 @@ entry-load chain is exercised for real:
   * all five platforms forward and create their entities
   * global services are registered once and unregistered on the last unload
 """
+
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.lydbro.const import DOMAIN
@@ -24,9 +26,7 @@ from custom_components.lydbro.coordinator import LydbroCoordinator
 from .fake_server import FakeLydbroServer
 
 
-async def _setup_entry(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> MockConfigEntry:
+async def _setup_entry(hass: HomeAssistant, fake_server: FakeLydbroServer) -> MockConfigEntry:
     """Register and load a config entry pointed at the fake bridge."""
     entry = MockConfigEntry(
         domain=DOMAIN,
@@ -128,8 +128,9 @@ async def test_setup_survives_initial_handshake_failure(
 
     # Shorten the handshake wait so the test doesn't hang on the
     # default CONNECT_TIMEOUT + 2s.
-    from custom_components.lydbro import client as client_mod
     from unittest.mock import patch
+
+    from custom_components.lydbro import client as client_mod
 
     with patch.object(client_mod, "CONNECT_TIMEOUT", 0.2):
         assert await hass.config_entries.async_setup(entry.entry_id)

@@ -13,6 +13,7 @@ silently dropped — HA's event platform doesn't reliably propagate
 dynamic additions to ``event_types``, so firmware-side changes need
 a matching update in ``const.KNOWN_BUTTONS``.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -24,7 +25,6 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.lydbro.const import DOMAIN
 
 from .fake_server import FakeLydbroServer
-
 
 BUTTON_ENTITY_ID = "event.test_lydbro_one_button"
 MENU_ENTITY_ID = "event.test_lydbro_one_menu"
@@ -73,9 +73,7 @@ async def test_button_event_known_name_triggers_and_carries_attributes(
 ) -> None:
     await _setup(hass, fake_server)
 
-    await fake_server.push_event(
-        "button_press", name="Play", kind="click", mode="MUSIC"
-    )
+    await fake_server.push_event("button_press", name="Play", kind="click", mode="MUSIC")
     await _wait_for_state(
         hass,
         BUTTON_ENTITY_ID,
@@ -99,9 +97,7 @@ async def test_button_event_unknown_name_dropped(
     initial = hass.states.get(BUTTON_ENTITY_ID)
     initial_state = initial.state if initial else None
 
-    await fake_server.push_event(
-        "button_press", name="MadeUpKey", kind="click", mode="MUSIC"
-    )
+    await fake_server.push_event("button_press", name="MadeUpKey", kind="click", mode="MUSIC")
     await asyncio.sleep(0.05)
 
     state = hass.states.get(BUTTON_ENTITY_ID)
@@ -121,9 +117,7 @@ async def test_button_event_ignores_non_button_frames(
     initial_state = initial.state if initial else None
 
     await fake_server.push_event("menu_selection", name="Jazz", mode="MUSIC")
-    await fake_server.push_event(
-        "scene_button", name="N", position="top_left", mode="MUSIC"
-    )
+    await fake_server.push_event("scene_button", name="N", position="top_left", mode="MUSIC")
     await asyncio.sleep(0.05)
 
     state = hass.states.get(BUTTON_ENTITY_ID)
@@ -169,9 +163,7 @@ async def test_scene_event_known_position_triggers(
 ) -> None:
     await _setup(hass, fake_server)
 
-    await fake_server.push_event(
-        "scene_button", name="Morning", position="top_left", mode="MUSIC"
-    )
+    await fake_server.push_event("scene_button", name="Morning", position="top_left", mode="MUSIC")
     await _wait_for_state(
         hass,
         SCENE_ENTITY_ID,
@@ -199,9 +191,7 @@ async def test_scene_event_unknown_position_dropped(
     initial = hass.states.get(SCENE_ENTITY_ID)
     initial_state = initial.state if initial else None
 
-    await fake_server.push_event(
-        "scene_button", name="Elsewhere", position="middle", mode="MUSIC"
-    )
+    await fake_server.push_event("scene_button", name="Elsewhere", position="middle", mode="MUSIC")
     await asyncio.sleep(0.05)
 
     state = hass.states.get(SCENE_ENTITY_ID)

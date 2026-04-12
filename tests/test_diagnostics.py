@@ -6,6 +6,7 @@ payload is a dict with the four expected top-level keys and that each
 carries the data we promised: the config entry, the live connection
 state, the hello frame, and the latest state snapshot.
 """
+
 from __future__ import annotations
 
 from homeassistant.const import CONF_HOST, CONF_PORT
@@ -18,9 +19,7 @@ from custom_components.lydbro.diagnostics import async_get_config_entry_diagnost
 from .fake_server import FakeLydbroServer
 
 
-async def test_diagnostics_dump_shape(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
-) -> None:
+async def test_diagnostics_dump_shape(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id="aa:bb:cc:dd:ee:ff",

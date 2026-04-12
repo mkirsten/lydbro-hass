@@ -9,3 +9,5 @@
 # Use: python3.13 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 pytest-homeassistant-custom-component>=0.13.300
 mypy>=1.13
+pre-commit>=4.0
+ruff>=0.9
