@@ -1,0 +1,202 @@
+send_remote_key:
+  name: Send remote key
+  description: Send a BeoRemote One key press through the bridge.
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    key:
+      name: Key
+      required: true
+      example: "Play"
+      selector:
+        text:
+
+tv_send_key:
+  name: TV — send key
+  description: Send a key to a discovered TV (Samsung Tizen or LG webOS).
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    key:
+      name: Key
+      required: true
+      example: "KEY_VOLUP"
+      selector:
+        text:
+    device_ip:
+      name: TV IP
+      description: Optional — target a specific TV if you have more than one.
+      selector:
+        text:
+    device_type:
+      name: TV type
+      description: "samsung or lg (optional, auto-detected)"
+      selector:
+        select:
+          options:
+            - samsung
+            - lg
+
+tv_launch_app:
+  name: TV — launch app
+  description: Launch an app on the target TV.
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    app:
+      name: App
+      required: true
+      example: "Netflix"
+      selector:
+        text:
+    device_ip:
+      selector:
+        text:
+    device_type:
+      selector:
+        select:
+          options:
+            - samsung
+            - lg
+
+sonos_play_uri:
+  name: Sonos — play URI
+  description: Play a raw media URI on a Sonos speaker.
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    uri:
+      name: URI
+      required: true
+      selector:
+        text:
+    device_ip:
+      name: Sonos IP
+      selector:
+        text:
+
+sonos_play_spotify:
+  name: Sonos — play Spotify
+  description: Play a Spotify URI on a Sonos speaker.
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    uri:
+      name: Spotify URI
+      required: true
+      example: "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"
+      selector:
+        text:
+    device_ip:
+      selector:
+        text:
+
+sonos_play_favorite:
+  name: Sonos — play favorite
+  description: Play a Sonos favorite by name.
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    favorite:
+      name: Favorite
+      required: true
+      selector:
+        text:
+    device_ip:
+      selector:
+        text:
+
+sonos_set_volume:
+  name: Sonos — set volume
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    volume:
+      name: Volume
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+    device_ip:
+      selector:
+        text:
+
+sonos_adjust_volume:
+  name: Sonos — adjust volume
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    delta:
+      name: Delta
+      required: true
+      selector:
+        number:
+          min: -50
+          max: 50
+    device_ip:
+      selector:
+        text:
+
+sonos_join:
+  name: Sonos — join group
+  description: Join a Sonos speaker to the group led by master_ip.
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    master_ip:
+      name: Master IP
+      required: true
+      selector:
+        text:
+    device_ip:
+      selector:
+        text:
+
+rescan_discovery:
+  name: Rescan discovery
+  description: Trigger a mDNS rescan for Sonos / TVs / HA on the bridge.
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro

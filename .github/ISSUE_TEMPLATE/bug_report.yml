@@ -1,0 +1,43 @@
+name: Bug report
+description: Something isn't working the way it should
+labels: [bug]
+body:
+  - type: input
+    id: fw
+    attributes:
+      label: Lydbro One firmware version
+      description: Shown in the bridge's web UI and in the Firmware sensor.
+    validations:
+      required: true
+  - type: input
+    id: ha
+    attributes:
+      label: Home Assistant version
+    validations:
+      required: true
+  - type: input
+    id: integration
+    attributes:
+      label: Integration version
+      description: From HACS or the manifest.json of the installed component.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what did you see?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        Enable debug logging by adding to `configuration.yaml`:
+        ```yaml
+        logger:
+          logs:
+            custom_components.lydbro: debug
+        ```
+      render: text

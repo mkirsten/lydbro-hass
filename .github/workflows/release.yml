@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync manifest version with release tag
+        run: |
+          version="${GITHUB_REF#refs/tags/v}"
+          cd custom_components/lydbro
+          python - <<PY
+          import json, pathlib
+          p = pathlib.Path("manifest.json")
+          m = json.loads(p.read_text())
+          m["version"] = "${version}"
+          p.write_text(json.dumps(m, indent=2) + "\n")
+          PY
+
+      - name: Create zip
+        run: |
+          cd custom_components/lydbro
+          zip -r ../../lydbro.zip .
+
+      - name: Attach zip to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: lydbro.zip

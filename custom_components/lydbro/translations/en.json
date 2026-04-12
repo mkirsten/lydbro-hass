@@ -1,0 +1,47 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Lydbro One",
+        "description": "Enter the IP address or hostname of your Lydbro One bridge. The native TCP port is 6204 by default.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        }
+      },
+      "discovery_confirm": {
+        "title": "Lydbro One discovered",
+        "description": "Do you want to add **{name}** at `{host}` to Home Assistant?"
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to the Lydbro One bridge. Check that the device is powered, on the network, and that the Native TCP transport is selected in its config UI."
+    },
+    "abort": {
+      "already_configured": "This Lydbro One device is already configured."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "ble_connected": { "name": "BeoRemote link" },
+      "ethernet": { "name": "Ethernet" },
+      "safe_mode": { "name": "Safe mode" }
+    },
+    "sensor": {
+      "battery": { "name": "BeoRemote battery" },
+      "boot_phase": { "name": "Boot phase" },
+      "firmware_version": { "name": "Firmware" },
+      "ip_address": { "name": "IP address" }
+    },
+    "button": {
+      "reboot": { "name": "Reboot" },
+      "rescan_discovery": { "name": "Rescan discovery" },
+      "ble_disconnect": { "name": "Disconnect BeoRemote" }
+    },
+    "event": {
+      "button": { "name": "Button" },
+      "menu": { "name": "Menu" },
+      "scene": { "name": "Scene" }
+    }
+  }
+}
