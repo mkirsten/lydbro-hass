@@ -86,3 +86,24 @@ BUTTON_KINDS: Final = ("click", "hold", "release", "double")
 
 # Remote modes published in the "mode" field
 REMOTE_MODES: Final = ("MUSIC", "TV", "RADIO", "HOMEMEDIA", "GAMES", "CONTROL")
+
+# Everyday BeoRemote buttons exposed as individual HA `button`
+# entities (disabled by default to avoid cluttering the device page,
+# enable per-entity from the HA UI when wiring a Lovelace card).
+# The full KNOWN_BUTTONS list is 41 entries — exposing them all would
+# swamp the device page. This subset is the one users actually stick
+# on dashboards: transport, volume, power, navigation.
+COMMON_REMOTE_BUTTONS: Final = (
+    "Play",
+    "Pause",
+    "Stop",
+    "Next",
+    "Previous",
+    "Volume Up",
+    "Volume Down",
+    "Mute",
+    "Power",
+    "Home",
+    "Back",
+    "Menu",
+)

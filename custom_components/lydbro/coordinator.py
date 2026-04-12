@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -171,6 +172,7 @@ class LydbroCoordinator:
 
     async def _handle_event(self, frame: dict[str, Any]) -> None:
         etype = frame.get("type")
+        state_touched = False
 
         # state_change events are the device's way of pushing a delta
         # without re-sending the whole snapshot. Merge into local state,
@@ -181,14 +183,39 @@ class LydbroCoordinator:
             value = frame.get("value")
             if isinstance(name, str):
                 self.state[name] = _coerce_numeric(name, value)
-                async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id))
+                state_touched = True
                 self._issue_monitor.evaluate()
 
         if etype == "boot_phase":
             phase = frame.get("phase")
             if isinstance(phase, str):
                 self.state["boot_phase"] = phase
-                async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id))
+                state_touched = True
+
+        # Every event frame that carries a ``mode`` field is a truthful
+        # report of the remote's current mode — use the most recent one
+        # as the device's "current mode". This is how the mode sensor
+        # tracks MUSIC / TV / RADIO / … since the firmware doesn't
+        # publish mode in the state snapshot.
+        mode = frame.get("mode")
+        if isinstance(mode, str) and mode and self.state.get("mode") != mode:
+            self.state["mode"] = mode
+            state_touched = True
+
+        # Record "last button press" so a sensor can surface it for
+        # dashboards. We store the timestamp as an ISO-8601 string so
+        # the state dict stays JSON-serialisable (diagnostics dump it
+        # raw), plus the name/kind/mode so the sensor can expose them
+        # as attributes.
+        if etype == "button_press":
+            self.state["last_button_press"] = datetime.now(UTC).isoformat()
+            self.state["last_button_name"] = frame.get("name")
+            self.state["last_button_kind"] = frame.get("kind")
+            self.state["last_button_mode"] = frame.get("mode")
+            state_touched = True
+
+        if state_touched:
+            async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id))
 
         # Fan out to dispatcher listeners (event entities).
         async_dispatcher_send(self.hass, SIGNAL_EVENT.format(self.entry.entry_id), frame)

@@ -63,12 +63,36 @@
       "battery": { "name": "BeoRemote battery" },
       "boot_phase": { "name": "Boot phase" },
       "firmware_version": { "name": "Firmware" },
-      "ip_address": { "name": "IP address" }
+      "ip_address": { "name": "IP address" },
+      "last_button_press": { "name": "Last button press" },
+      "current_mode": {
+        "name": "Current mode",
+        "state": {
+          "music": "Music",
+          "tv": "TV",
+          "radio": "Radio",
+          "homemedia": "Home media",
+          "games": "Games",
+          "control": "Control"
+        }
+      }
     },
     "button": {
       "reboot": { "name": "Reboot" },
       "rescan_discovery": { "name": "Rescan discovery" },
-      "ble_disconnect": { "name": "Disconnect BeoRemote" }
+      "ble_disconnect": { "name": "Disconnect BeoRemote" },
+      "remote_key_play": { "name": "Play" },
+      "remote_key_pause": { "name": "Pause" },
+      "remote_key_stop": { "name": "Stop" },
+      "remote_key_next": { "name": "Next" },
+      "remote_key_previous": { "name": "Previous" },
+      "remote_key_volume_up": { "name": "Volume up" },
+      "remote_key_volume_down": { "name": "Volume down" },
+      "remote_key_mute": { "name": "Mute" },
+      "remote_key_power": { "name": "Power" },
+      "remote_key_home": { "name": "Home" },
+      "remote_key_back": { "name": "Back" },
+      "remote_key_menu": { "name": "Menu" }
     },
     "event": {
       "button": { "name": "Button" },

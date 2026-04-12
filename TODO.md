@@ -115,10 +115,10 @@ gating:** `test_remote.py` (async_send_command forwarding, async_turn_off),
 ## Beyond Gold — product-level things worth considering
 
 - [ ] **Firmware update entity** — `update.lydbro_one_firmware` backed by the bridge's `/api/status` + `/ota` endpoints so users flash firmware from HA's Updates panel
-- [ ] **Per-button `button` entities** — in addition to the `event` entity, expose each common button as an HA `button` that calls `remote.send_command` internally. Useful for Lovelace dashboards without scripting.
-- [ ] **Sensor for last button press** with timestamp — for dashboards
-- [ ] **Current mode sensor** (MUSIC / TV / RADIO) — for dashboard conditionals
-- [ ] **Sonos media_player wrapping** — a media_player entity per discovered Sonos speaker, letting automations call `media_player.play_media` directly instead of the `lydbro.sonos_*` services
+- [x] **Per-button `button` entities** — `button.py` exposes the 12 everyday keys in `COMMON_REMOTE_BUTTONS` (Play / Pause / Stop / Next / Previous / Volume Up / Volume Down / Mute / Power / Home / Back / Menu) as `LydbroVirtualRemoteButton` entities. Disabled by default so they don't swamp the device page; enable per-button from the HA UI when wiring a Lovelace card. Each calls `send_remote_key` with the matching key.
+- [x] **Sensor for last button press** with timestamp — `sensor.*_last_button_press` (timestamp device class, disabled by default) updated on every `button_press` event. Carries `name` / `kind` / `mode` as attributes so dashboards can show the full context of the last press.
+- [x] **Current mode sensor** (MUSIC / TV / RADIO) — `sensor.*_current_mode` (enum device class, disabled by default). Coordinator tracks the mode field on any event frame that carries one, so dashboards can do `{{ states('sensor.lab_beoremote_one_current_mode') == 'music' }}` conditionals.
+- [~] **Sonos media_player wrapping — REJECTED.** ~~A media_player entity per discovered Sonos speaker.~~ The right answer for HA-side automation is the official **Sonos** integration, which talks to speakers natively and handles grouping / queue / album art far better than we ever would. The Lydbro Sonos services (`lydbro.sonos_*`) exist only because the ESP32 has to drive Sonos *autonomously* from BeoRemote presses — that's a different use case. Wrapping Sonos through the bridge for HA would just add a single point of failure in front of something that already works directly.
 - [x] **Battery low repair issue** — shipped in `repairs.py`, raises at ≤10% with 15% clear hysteresis (implemented alongside the Gold `repair-issues` item)
 - [ ] **Discovery of multiple Lydbro devices on one LAN** — mostly works now via the unique_id, but test with two bridges
 
@@ -130,4 +130,4 @@ gating:** `test_remote.py` (async_send_command forwarding, async_turn_off),
 - [x] **Pre-commit hooks** — `.pre-commit-config.yaml` runs ruff lint + ruff-format, mypy (via the project venv, not an isolated one, so the HA version matches CI), and file-hygiene hooks (trailing whitespace, EOF, check-yaml/json, merge conflicts, large files, line endings). Install with `pre-commit install` after `pip install -r requirements-dev.txt`.
 - [ ] **Screenshot in README** of the integration card + device page
 - [ ] **Translations beyond English** — Swedish, Danish (the Lydbro home turf)
-- [ ] **README badges** for quality scale tier once we hit one
+- [x] **README badges** — quality-scale badge (Platinum) added alongside HACS / Validate / Release badges

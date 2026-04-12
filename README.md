@@ -8,6 +8,7 @@
   <a href="https://github.com/hacs/integration"><img alt="HACS" src="https://img.shields.io/badge/HACS-Custom-41BDF5.svg"></a>
   <a href="https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml"><img alt="Validate" src="https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml/badge.svg"></a>
   <a href="https://github.com/mkirsten/lydbro-hass/releases"><img alt="Release" src="https://img.shields.io/github/v/release/mkirsten/lydbro-hass?include_prereleases"></a>
+  <a href="https://developers.home-assistant.io/docs/core/integration-quality-scale"><img alt="Quality Scale" src="https://img.shields.io/badge/quality_scale-platinum-5c7cfa.svg"></a>
 </p>
 
 Native Home Assistant integration for [Lydbro](https://lydbro.com) devices —

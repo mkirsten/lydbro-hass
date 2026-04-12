@@ -11,10 +11,13 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from homeassistant.const import ATTR_DEVICE_ID, CONF_HOST, CONF_PORT
+from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
+from homeassistant.components.button import SERVICE_PRESS
+from homeassistant.const import ATTR_DEVICE_ID, ATTR_ENTITY_ID, CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.lydbro.const import DOMAIN
@@ -203,3 +206,44 @@ async def test_service_protocol_error_translated(
         "cmd": "send_remote_key",
         "error": "no such device",
     }
+
+
+# ---------------------------------------------------------------------------
+# Virtual remote-key buttons
+# ---------------------------------------------------------------------------
+
+
+async def test_virtual_remote_button_press_forwards_send_remote_key(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Pressing the virtual Play button fires send_remote_key key=Play.
+
+    The entity is disabled by default so we re-enable it explicitly
+    — that's the real-world flow: user enables the buttons they
+    care about from the device page, then drags them onto a card.
+    """
+    await _setup(hass, fake_server)
+
+    ent_reg = er.async_get(hass)
+    entity_id = "button.test_lydbro_one_play"
+    entry = ent_reg.async_get(entity_id)
+    assert entry is not None, "expected virtual Play button entity to exist"
+    assert entry.disabled_by is not None, "virtual buttons should be disabled by default"
+
+    # Re-enable and force a reload so the platform picks it up.
+    ent_reg.async_update_entity(entity_id, disabled_by=None)
+    await hass.config_entries.async_reload(entry.config_entry_id)
+    await hass.async_block_till_done()
+
+    await hass.services.async_call(
+        BUTTON_DOMAIN,
+        SERVICE_PRESS,
+        {ATTR_ENTITY_ID: entity_id},
+        blocking=True,
+    )
+
+    # The press → send_remote_key(key="Play") round-trip should have
+    # produced exactly one cmd on the fake bridge.
+    cmds = [c for c in fake_server.received_cmds if c["cmd"] == "send_remote_key"]
+    assert len(cmds) == 1
+    assert cmds[0]["key"] == "Play"

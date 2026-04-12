@@ -218,3 +218,63 @@ async def test_available_flips_false_on_server_drop(
 
     await fake_server.drop_client()
     await _wait_for(lambda: coordinator.available is False, timeout=3.0)
+
+
+# ---------------------------------------------------------------------------
+# Dashboard-oriented state: last_button_press + current mode
+# ---------------------------------------------------------------------------
+
+
+async def test_button_press_records_last_button_fields(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Every button_press frame updates last_button_* keys in state."""
+    from datetime import datetime
+
+    _, coordinator = await _setup(hass, fake_server)
+    assert "last_button_press" not in coordinator.state
+
+    await fake_server.push_event("button_press", name="Play", kind="click", mode="MUSIC")
+    await _wait_for(lambda: "last_button_press" in coordinator.state)
+
+    assert coordinator.state["last_button_name"] == "Play"
+    assert coordinator.state["last_button_kind"] == "click"
+    assert coordinator.state["last_button_mode"] == "MUSIC"
+
+    # Timestamp parses as a datetime.
+    ts = coordinator.state["last_button_press"]
+    assert isinstance(ts, str)
+    parsed = datetime.fromisoformat(ts)
+    assert parsed is not None
+
+
+async def test_mode_tracked_from_any_event_with_mode(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Any event frame carrying a mode field updates state['mode']."""
+    _, coordinator = await _setup(hass, fake_server)
+    assert "mode" not in coordinator.state
+
+    await fake_server.push_event("button_press", name="Play", kind="click", mode="MUSIC")
+    await _wait_for(lambda: coordinator.state.get("mode") == "MUSIC")
+
+    # Switching mode via any event (menu_selection here) should
+    # update the cached mode.
+    await fake_server.push_event("menu_selection", name="Samsung Frame", mode="TV")
+    await _wait_for(lambda: coordinator.state.get("mode") == "TV")
+
+
+async def test_mode_untouched_by_frame_without_mode(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """A state_change delta without a mode field must not clear the cached mode."""
+    _, coordinator = await _setup(hass, fake_server)
+
+    # Prime the mode.
+    await fake_server.push_event("button_press", name="Play", kind="click", mode="MUSIC")
+    await _wait_for(lambda: coordinator.state.get("mode") == "MUSIC")
+
+    # A later delta that has no mode field should leave MUSIC in place.
+    await fake_server.push_event("state_change", name="battery", value="42")
+    await _wait_for(lambda: coordinator.state.get("battery") == 42)
+    assert coordinator.state["mode"] == "MUSIC"
