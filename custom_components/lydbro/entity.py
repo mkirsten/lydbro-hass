@@ -1,6 +1,7 @@
 """Base entity for Lydbro — shared device_info + dispatcher plumbing."""
 from __future__ import annotations
 
+from homeassistant.core import callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
@@ -40,5 +41,10 @@ class LydbroEntity(Entity):
             )
         )
 
+    @callback
     def _handle_update(self) -> None:
+        # @callback marks this as event-loop-safe so the dispatcher
+        # runs it inline instead of scheduling it on a worker thread,
+        # which would violate async_write_ha_state's thread-safety
+        # check and crash HA at runtime.
         self.async_write_ha_state()

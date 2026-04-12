@@ -1,9 +1,10 @@
 # Dev dependencies for running the test suite against Home Assistant.
 #
-# pytest-homeassistant-custom-component pins its own homeassistant
-# version — leave the version unpinned so a fresh venv picks up
-# whatever is current. CI pins via a lockfile once we add one.
-pytest>=8.0
-pytest-asyncio>=0.23
-pytest-cov>=5.0
-pytest-homeassistant-custom-component
+# pytest-homeassistant-custom-component pulls in homeassistant itself
+# as a transitive dependency. Recent HA (2026.x) requires Python
+# 3.13+ — if you create the venv with an older interpreter, pip will
+# silently resolve to a much older HA (2025.1.x) that doesn't match
+# what the integration targets, and zeroconf imports break.
+#
+# Use: python3.13 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+pytest-homeassistant-custom-component>=0.13.300
