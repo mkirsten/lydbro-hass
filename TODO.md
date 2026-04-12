@@ -54,10 +54,7 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **entity-translations** — `strings.json` + `translations/en.json`
 - [x] **diagnostics** — `diagnostics.py` exports entry/connection/hello/state via the HA diagnostics download flow; nothing sensitive so no redaction
 - [x] **reconfiguration-flow** — `async_step_reconfigure` lets the user update host/port in place; refuses to point an entry at a different physical device (id mismatch)
-- [ ] **repair-issues** — raise `homeassistant.helpers.issue_registry.async_create_issue` when:
-  - device reports `safe_mode=true` → severity `error`, action: link to the config UI
-  - firmware version is older than a known-good minimum → severity `warning`
-  - BLE link has been down for more than N minutes → severity `warning`
+- [x] **repair-issues** — `repairs.py` raises HA repair issues for `safe_mode=true` (severity error, learn_more link to the bridge web UI), low battery ≤10% with 15% clear hysteresis, and BLE link down >5 min. Auto-clear when the condition recovers. `tests/test_repairs.py` covers each, including hysteresis and grace-period cancellation. Firmware-version "older than known-good" warning deliberately not implemented — no "known-good minimum" exists yet; add once there's a real floor to enforce.
 - [x] **exception-translations** — `cmd_failed` and `device_not_found` errors use `translation_domain` + `translation_key` + `translation_placeholders`; English strings in `strings.json` and `translations/en.json`
 - [ ] **icon-translations** — ship `icons.json` to override entity icons without hard-coding `_attr_icon` strings (e.g. mdi:remote for the remote entity, mdi:remote-tv for the Button event)
 - [ ] **stale-devices** — N/A (single device per entry), document the N/A decision

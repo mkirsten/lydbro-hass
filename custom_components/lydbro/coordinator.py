@@ -11,6 +11,7 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .client import CONNECT_TIMEOUT, LydbroClient, LydbroProtocolError
+from .repairs import LydbroIssueMonitor
 from .const import (
     DOMAIN,
     EVENT_BUS_BUTTON,
@@ -84,6 +85,7 @@ class LydbroCoordinator:
             on_event=self._handle_event,
             on_connection_change=self._handle_connection,
         )
+        self._issue_monitor = LydbroIssueMonitor(hass, self)
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -104,6 +106,7 @@ class LydbroCoordinator:
             )
 
     async def async_stop(self) -> None:
+        self._issue_monitor.shutdown()
         await self._client.stop()
 
     # ------------------------------------------------------------------
@@ -165,6 +168,7 @@ class LydbroCoordinator:
         async_dispatcher_send(
             self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
         )
+        self._issue_monitor.evaluate()
 
     async def _handle_event(self, frame: dict[str, Any]) -> None:
         etype = frame.get("type")
@@ -181,6 +185,7 @@ class LydbroCoordinator:
                 async_dispatcher_send(
                     self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
                 )
+                self._issue_monitor.evaluate()
 
         if etype == "boot_phase":
             phase = frame.get("phase")
