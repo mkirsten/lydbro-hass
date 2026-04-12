@@ -1,16 +1,14 @@
+# Python byte-code (picked up on any dev machine that runs HA locally)
 __pycache__/
 *.py[cod]
-*.egg-info/
-.venv/
-venv/
-.env
+
+# Editor / OS junk
 .DS_Store
 .idea/
 .vscode/
-dist/
-build/
+
+# Release artifacts (the release workflow builds lydbro.zip on the runner)
 *.zip
-.coverage
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
+
+# Local secrets — never commit tokens
+.env
