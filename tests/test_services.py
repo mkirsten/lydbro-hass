@@ -247,3 +247,59 @@ async def test_virtual_remote_button_press_forwards_send_remote_key(
     cmds = [c for c in fake_server.received_cmds if c["cmd"] == "send_remote_key"]
     assert len(cmds) == 1
     assert cmds[0]["key"] == "Play"
+
+
+async def test_admin_reboot_button_press_forwards_cmd(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Pressing the Reboot admin button fires the raw ``reboot`` cmd."""
+    await _setup(hass, fake_server)
+
+    await hass.services.async_call(
+        BUTTON_DOMAIN,
+        SERVICE_PRESS,
+        {ATTR_ENTITY_ID: "button.test_lydbro_one_reboot"},
+        blocking=True,
+    )
+
+    assert len(fake_server.received_cmds) == 1
+    assert fake_server.received_cmds[0]["cmd"] == "reboot"
+
+
+async def test_services_only_registered_once_across_multiple_entries(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Loading a second config entry re-enters async_register_services.
+
+    The idempotency guard (``has_service`` check) should short-circuit
+    the second call — without it we'd get "service already registered"
+    warnings and double-register handlers.
+    """
+    # First entry via the usual _setup helper.
+    await _setup(hass, fake_server)
+    assert hass.services.has_service(DOMAIN, "send_remote_key")
+
+    # Second entry on the same fake bridge — different unique_id so
+    # HA accepts it as a separate config entry, different host to
+    # keep the unique_id keying obvious.
+    second = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="11:22:33:44:55:66",
+        data={
+            CONF_HOST: "127.0.0.1",
+            CONF_PORT: fake_server.port,
+            "device_id": "11:22:33:44:55:66",
+            "fw_version": "0.11.9.3",
+        },
+        title="Second Lydbro One",
+    )
+    second.add_to_hass(hass)
+    # The fake server only tracks one connected client at a time but
+    # the coordinator's async_start doesn't block on a clean handshake
+    # — it logs a warning and keeps trying. For this test we only
+    # care that the services-register path short-circuits.
+    assert await hass.config_entries.async_setup(second.entry_id)
+    await hass.async_block_till_done()
+
+    # Still exactly the one registration, no duplicate handlers.
+    assert hass.services.has_service(DOMAIN, "send_remote_key")

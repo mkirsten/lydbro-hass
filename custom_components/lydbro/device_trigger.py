@@ -109,7 +109,13 @@ async def async_attach_trigger(
         event_type = EVENT_BUS_MENU
         event_data = {"device_id": device_id}
     else:
-        raise ValueError(f"Unknown lydbro trigger type: {trigger_type}")
+        # TRIGGER_SCHEMA already rejects anything outside TRIGGER_TYPES
+        # via vol.In, so this branch is unreachable in practice — it
+        # exists purely as a defensive backstop if the schema and the
+        # type list ever drift apart.
+        raise ValueError(  # pragma: no cover
+            f"Unknown lydbro trigger type: {trigger_type}"
+        )
 
     # Use plain string keys — the HA-internal event_trigger module
     # re-exports CONF_PLATFORM / CONF_EVENT_TYPE / CONF_EVENT_DATA but

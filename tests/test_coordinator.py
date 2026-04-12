@@ -278,3 +278,74 @@ async def test_mode_untouched_by_frame_without_mode(
     await fake_server.push_event("state_change", name="battery", value="42")
     await _wait_for(lambda: coordinator.state.get("battery") == 42)
     assert coordinator.state["mode"] == "MUSIC"
+
+
+# ---------------------------------------------------------------------------
+# Numeric-coerce edge cases (_coerce_numeric in coordinator.py)
+# ---------------------------------------------------------------------------
+
+
+async def test_battery_float_string_coerced_to_float_fallback(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Firmware ever sending battery as "12.5" should parse via the float fallback."""
+    _, coordinator = await _setup(hass, fake_server)
+
+    await fake_server.push_event("state_change", name="battery", value="12.5")
+    await _wait_for(lambda: coordinator.state.get("battery") == 12.5)
+    assert isinstance(coordinator.state["battery"], float)
+
+
+async def test_battery_garbage_string_becomes_none(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Non-numeric battery value hits the double-ValueError → None fallback."""
+    _, coordinator = await _setup(hass, fake_server)
+
+    await fake_server.push_event("state_change", name="battery", value="not-a-number")
+    await _wait_for(lambda: coordinator.state.get("battery") is None)
+
+
+def test_coerce_numeric_passthrough_for_unexpected_types() -> None:
+    """Non-str/int/float values pass through unchanged via the final branch."""
+    from custom_components.lydbro.coordinator import _coerce_numeric
+
+    # JSON bool, list — not strictly valid for ``battery`` but the
+    # function's final ``return value`` branch hands them back
+    # untouched rather than crashing.
+    assert _coerce_numeric("battery", True) is True
+    assert _coerce_numeric("battery", [1, 2]) == [1, 2]
+
+
+# ---------------------------------------------------------------------------
+# HA bus fan-out: the early-return when the device registry hasn't
+# caught up yet.
+# ---------------------------------------------------------------------------
+
+
+async def test_event_before_device_registered_is_silently_dropped(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """If _ha_device_id() is None the event-to-bus fan-out short-circuits.
+
+    This is the defensive branch that handles events arriving before
+    any entity platform has registered the device — in practice it
+    never happens (platforms forward before the client is flagged
+    connected), but the code path is there and we pin it so a
+    refactor that removes the guard surfaces the change.
+    """
+    _, coordinator = await _setup(hass, fake_server)
+
+    captured: list[Event] = []
+    hass.bus.async_listen(EVENT_BUS_BUTTON, lambda e: captured.append(e))
+
+    # Monkeypatch the device-id lookup to return None as if the device
+    # hadn't been registered yet, then push an event frame through the
+    # real handler.
+    coordinator._ha_device_id = lambda: None  # type: ignore[method-assign]
+    await coordinator._handle_event(
+        {"t": "event", "type": "button_press", "name": "Play", "kind": "click"}
+    )
+
+    await asyncio.sleep(0.05)
+    assert captured == []  # guarded return took the short path

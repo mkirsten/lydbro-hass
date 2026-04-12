@@ -126,6 +126,20 @@ config UI has *HA integration* set to MQTT or Webhook, flip it to
 Native TCP before adding the integration. Native TCP must be enabled
 on the device for the integration to connect at all.
 
+### The bridge's web UI
+
+The Lydbro One serves a built-in config UI at `http://<bridge-ip>/`
+that's the source of truth for per-bridge settings: which HA
+transport to use, Samsung / LG TV pairing, Sonos config, scene-button
+bindings, and firmware updates. You don't normally need to touch it
+after initial setup — zeroconf discovery will hand HA the right
+address and Native TCP will populate the rest — but it's where you
+go when something is off.
+
+<p align="center">
+  <img src="docs/screenshots/bridge-config-ui.png" alt="Lydbro One bridge web UI" width="720">
+</p>
+
 ---
 
 ## Installation

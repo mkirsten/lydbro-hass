@@ -150,8 +150,17 @@ class LydbroClient:
         while not self._stop.is_set():
             try:
                 await self._connect_and_serve()
-                backoff = 1.0  # clean disconnect — reset backoff
-            except asyncio.CancelledError:
+                # clean disconnect — reset backoff. Only hit if
+                # _connect_and_serve ever returns without raising,
+                # which the current read-loop design never does (peer
+                # close raises LydbroProtocolError). Kept as defensive
+                # bookkeeping for a future refactor.
+                backoff = 1.0  # pragma: no cover
+            except asyncio.CancelledError:  # pragma: no cover
+                # The runner task was cancelled from outside — let
+                # cancellation propagate so the coroutine shuts down
+                # cleanly instead of being swallowed by the generic
+                # Exception handler below.
                 raise
             except Exception as err:  # noqa: BLE001 — resilient loop
                 _LOGGER.debug("lydbro %s:%d connection error: %s", self._host, self._port, err)
@@ -243,11 +252,15 @@ class LydbroClient:
     async def _ping_loop(self) -> None:
         while not self._stop.is_set():
             await asyncio.sleep(PING_INTERVAL)
-            if self._writer is None:
+            # The writer-gone and write-failure branches are
+            # defensive bookkeeping — in normal operation the
+            # ping loop is cancelled by _connect_and_serve before
+            # either condition can occur.
+            if self._writer is None:  # pragma: no cover
                 return
             try:
                 await self._write_json({"t": "ping"})
-            except Exception:  # noqa: BLE001
+            except Exception:  # noqa: BLE001  # pragma: no cover
                 return
 
     # ------------------------------------------------------------------
@@ -255,7 +268,10 @@ class LydbroClient:
     # ------------------------------------------------------------------
 
     async def _write_json(self, payload: dict[str, Any]) -> None:
-        if self._writer is None:
+        if self._writer is None:  # pragma: no cover
+            # Defensive: send_cmd guards against writer=None earlier
+            # in its own flow, so this branch is only reachable if a
+            # future caller forgets to and passes through directly.
             raise LydbroProtocolError("not connected")
         data = (json.dumps(payload, separators=(",", ":")) + "\n").encode("utf-8")
         async with self._write_lock:

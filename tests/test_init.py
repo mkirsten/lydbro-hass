@@ -143,3 +143,26 @@ async def test_setup_survives_initial_handshake_failure(
     # Clean up — the coordinator's reconnect task is still running.
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
+
+
+async def test_options_update_triggers_reload(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Updating entry options fires the _async_update_listener reload path.
+
+    We don't expose any user-facing options today, but __init__.py
+    wires the listener so future additions Just Work. This test pins
+    the reload side of that wiring.
+    """
+    entry = await _setup_entry(hass, fake_server)
+    assert entry.state is ConfigEntryState.LOADED
+
+    # Trigger the listener by updating options — any dict change
+    # works, HA diffs the old vs new and fires the update callback.
+    hass.config_entries.async_update_entry(entry, options={"foo": "bar"})
+    await hass.async_block_till_done()
+
+    # After the async_reload call the entry is still LOADED (just
+    # with fresh runtime_data + re-attached entities).
+    assert entry.state is ConfigEntryState.LOADED
+    assert entry.options == {"foo": "bar"}

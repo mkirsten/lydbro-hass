@@ -140,3 +140,18 @@ async def test_current_mode_enum_lowercased(
     await _wait_for(
         lambda: hass.states.get(CURRENT_MODE_ENTITY).state == "tv"  # type: ignore[union-attr]
     )
+
+
+# ---------------------------------------------------------------------------
+# _parse_last_press fallback
+# ---------------------------------------------------------------------------
+
+
+def test_parse_last_press_bad_iso_returns_none() -> None:
+    """A corrupted ISO timestamp in state parses back to None, not a crash."""
+    from custom_components.lydbro.sensor import _parse_last_press
+
+    assert _parse_last_press({"last_button_press": "definitely not iso"}) is None
+    assert _parse_last_press({}) is None
+    assert _parse_last_press({"last_button_press": 12345}) is None
+    assert _parse_last_press({"last_button_press": "2026-04-12T20:30:00+00:00"}) is not None

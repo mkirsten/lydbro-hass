@@ -68,7 +68,10 @@ class _LydbroEventBase(LydbroEntity, EventEntity):
 
     @callback
     def _handle_frame(self, frame: dict[str, Any]) -> None:
-        raise NotImplementedError
+        # Abstract — every concrete subclass overrides. Kept as a
+        # raise so a future subclass that forgets to override fails
+        # loudly instead of silently dropping frames.
+        raise NotImplementedError  # pragma: no cover
 
 
 class LydbroButtonEvent(_LydbroEventBase):

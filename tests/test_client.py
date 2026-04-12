@@ -306,3 +306,129 @@ async def test_send_cmd_while_disconnected_raises(
             await client.send_cmd("rescan_discovery")
     finally:
         await client.stop()
+
+
+# ---------------------------------------------------------------------------
+# Small error and edge paths — exist to pin coverage and protect against
+# silent regressions in the read loop's frame dispatcher.
+# ---------------------------------------------------------------------------
+
+
+async def test_start_called_twice_is_a_noop(fake_server: FakeLydbroServer) -> None:
+    """Second start() while already running must not spawn a duplicate runner."""
+    client, _ = await _connected_client(fake_server)
+    try:
+        runner_before = client._runner  # type: ignore[attr-defined]
+        assert runner_before is not None
+        await client.start()
+        runner_after = client._runner  # type: ignore[attr-defined]
+        assert runner_after is runner_before
+    finally:
+        await client.stop()
+
+
+async def test_server_pong_is_silently_accepted(fake_server: FakeLydbroServer) -> None:
+    """A pong from the server is a no-op, not a malformed-frame drop."""
+    client, _ = await _connected_client(fake_server)
+    try:
+        # Push a raw pong — the client has no pending ping, so this
+        # just exercises the "ignore" branch of _handle_frame.
+        await fake_server.push_raw(b'{"t":"pong"}\n')
+        await asyncio.sleep(0.05)
+        assert client.connected is True
+    finally:
+        await client.stop()
+
+
+async def test_server_error_frame_is_logged_not_fatal(
+    fake_server: FakeLydbroServer, caplog
+) -> None:
+    """A server-side {t:"error", ...} frame logs a warning but doesn't disconnect."""
+    client, recorder = await _connected_client(fake_server)
+    try:
+        with caplog.at_level("WARNING"):
+            await fake_server.push_raw(b'{"t":"error","msg":"boom"}\n')
+            # Push a real event behind the error to prove the read loop
+            # is still alive.
+            await fake_server.push_event("button_press", name="Play", kind="click")
+            await asyncio.wait_for(recorder.event_event.wait(), 2.0)
+
+        assert client.connected is True
+        assert "lydbro server error" in caplog.text
+    finally:
+        await client.stop()
+
+
+async def test_unknown_frame_type_is_dropped(fake_server: FakeLydbroServer) -> None:
+    """Unrecognised frame types fall through to the debug-log tail."""
+    client, recorder = await _connected_client(fake_server)
+    try:
+        await fake_server.push_raw(b'{"t":"banana","flavour":"yellow"}\n')
+        # Prove the client still processes real frames after.
+        await fake_server.push_event("button_press", name="Play", kind="click")
+        await asyncio.wait_for(recorder.event_event.wait(), 2.0)
+        assert client.connected is True
+    finally:
+        await client.stop()
+
+
+async def test_read_timeout_disconnects_and_reconnects(
+    fake_server: FakeLydbroServer,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A long silence on the socket trips READ_TIMEOUT → LydbroProtocolError.
+
+    The resilient reconnect loop catches it and reconnects, so the
+    client bounces `connected` false → true.
+    """
+    from custom_components.lydbro import client as client_mod
+
+    monkeypatch.setattr(client_mod, "READ_TIMEOUT", 0.2)
+    # Also shrink the backoff so the reconnect is observable in test time.
+    monkeypatch.setattr(client_mod, "PING_INTERVAL", 10.0)
+
+    client, recorder = await _connected_client(fake_server)
+    try:
+        # First handshake landed; wait out the READ_TIMEOUT with no
+        # frames arriving.
+        first_connects = sum(1 for v in recorder.connection_changes if v is True)
+        assert first_connects == 1
+
+        # Wait long enough for the read timeout to trip and the
+        # reconnect loop to re-handshake.
+        for _ in range(60):
+            second_connects = sum(1 for v in recorder.connection_changes if v is True)
+            if second_connects >= 2:
+                break
+            await asyncio.sleep(0.1)
+
+        # At minimum we saw one disconnect and one reconnect.
+        assert any(v is False for v in recorder.connection_changes)
+        assert sum(1 for v in recorder.connection_changes if v is True) >= 2
+    finally:
+        await client.stop()
+
+
+def test_fail_pending_sets_exceptions_on_pending_futures() -> None:
+    """_fail_pending drains the pending dict and fails each live future."""
+    client = LydbroClient(
+        "127.0.0.1",
+        1,
+        on_hello=_Recorder().on_hello,
+        on_state=_Recorder().on_state,
+        on_event=_Recorder().on_event,
+    )
+    loop = asyncio.new_event_loop()
+    try:
+        fut1 = loop.create_future()
+        fut2 = loop.create_future()
+        client._pending[1] = fut1  # type: ignore[attr-defined]
+        client._pending[2] = fut2  # type: ignore[attr-defined]
+
+        client._fail_pending(LydbroProtocolError("boom"))  # type: ignore[attr-defined]
+
+        assert fut1.done() and isinstance(fut1.exception(), LydbroProtocolError)
+        assert fut2.done() and isinstance(fut2.exception(), LydbroProtocolError)
+        assert client._pending == {}  # type: ignore[attr-defined]
+    finally:
+        loop.close()

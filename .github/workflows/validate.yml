@@ -30,15 +30,16 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements-dev.txt
       - name: Run pytest with coverage floor
-        # --cov-fail-under matches the local coverage we established
-        # (see TODO.md: Silver test-coverage-above-95%). Drop this
-        # floor deliberately if a refactor genuinely reduces the
-        # useful surface, not to make a red build green.
+        # Full-tree coverage is the goal: genuinely defensive dead
+        # code is marked `# pragma: no cover` in-source, everything
+        # else is exercised by a test. Drop this floor deliberately
+        # if a refactor changes the surface, not to make a red build
+        # green.
         run: |
           python -m pytest tests/ \
             --cov=custom_components/lydbro \
             --cov-report=term-missing \
-            --cov-fail-under=95
+            --cov-fail-under=100
       - name: mypy strict
         # Platinum strict-typing — see TODO.md. Keep strict=True on;
         # don't soften the config to make a red build green.

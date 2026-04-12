@@ -29,10 +29,16 @@ async def _probe(host: str, port: int) -> dict[str, Any]:
         hello.update(frame)
         done.set()
 
-    async def on_state(_frame: dict[str, Any]) -> None:
+    # The probe only needs ``on_hello`` — the client's callback
+    # interface requires all three, but state and event frames that
+    # arrive after hello are discarded. Whether they fire at all
+    # depends on a race between ``client.stop()`` and the next
+    # server frame, which makes these branches untestable in any
+    # meaningful way.
+    async def on_state(_frame: dict[str, Any]) -> None:  # pragma: no cover
         pass
 
-    async def on_event(_frame: dict[str, Any]) -> None:
+    async def on_event(_frame: dict[str, Any]) -> None:  # pragma: no cover
         pass
 
     client = LydbroClient(
