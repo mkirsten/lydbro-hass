@@ -1,16 +1,17 @@
-"""Event platform — exposes BeoRemote One button, menu, and scene events.
+"""Event platform — BeoRemote One button, menu, and scene events.
 
-Event entities are the modern HA pattern for remote controls: each press
-arrives as a first-class trigger source, not a hidden `bus.fire`. Three
-event entities are created per device:
+Three event entities are created per device:
+  * ``event.<device>_button``  — every physical button press. The
+    ``event_type`` is the button name ("Play", "Next", ...); ``kind``
+    (click / hold / double / release) and ``mode`` (MUSIC / TV / ...)
+    come through as attributes.
+  * ``event.<device>_menu``    — vendor-menu selections from the
+    remote's custom UI. ``event_type`` is the menu item name.
+  * ``event.<device>_scene``   — the four corner "scene" buttons
+    (N/E/S/W).
 
-  * ``event.<device>_button``  — every physical button press (click/hold/
-    release/double). The ``event_type`` is the button name ("Play",
-    "Next", ...); ``kind`` and ``mode`` come through as attributes.
-  * ``event.<device>_menu``    — vendor-menu selections from the remote's
-    custom UI. ``event_type`` is the menu item name.
-  * ``event.<device>_scene``   — the four corner "scene" buttons that the
-    remote can be assigned to. ``event_type`` is the scene label.
+Device triggers in :mod:`.device_trigger` build a nicer automation-
+editor UX on top of these entities.
 """
 from __future__ import annotations
 
@@ -25,6 +26,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import DOMAIN, KNOWN_BUTTONS, SIGNAL_EVENT
 from .coordinator import LydbroCoordinator
 from .entity import LydbroEntity
+
+_LOGGER_NAME = __name__
 
 
 async def async_setup_entry(
@@ -44,8 +47,6 @@ async def async_setup_entry(
 
 class _LydbroEventBase(LydbroEntity, EventEntity):
     """Shared wiring — subscribes to the event dispatcher and filters."""
-
-    _frame_type: str = ""
 
     def __init__(self, coordinator: LydbroCoordinator, key: str) -> None:
         super().__init__(coordinator)
@@ -71,27 +72,26 @@ class LydbroButtonEvent(_LydbroEventBase):
     """Physical BeoRemote One button presses."""
 
     _attr_device_class = EventDeviceClass.BUTTON
-    _attr_event_types = list(KNOWN_BUTTONS)
 
     def __init__(self, coordinator: LydbroCoordinator) -> None:
         super().__init__(coordinator, "button")
+        # Per-instance list — never mutate a class-level list, that would
+        # leak state across devices on a multi-bridge install.
+        self._attr_event_types = list(KNOWN_BUTTONS)
 
     @callback
     def _handle_frame(self, frame: dict[str, Any]) -> None:
         if frame.get("type") != "button_press":
             return
         name = frame.get("name")
-        if not isinstance(name, str) or not name:
+        if not isinstance(name, str) or name not in self._attr_event_types:
+            # Drop rather than mutate event_types at runtime — HA's
+            # event platform doesn't reliably propagate dynamic
+            # additions to the frontend picker. If firmware starts
+            # emitting a new button, add it to KNOWN_BUTTONS in const.py.
             return
-        # HA's event platform rejects event_types that weren't declared
-        # up-front. Unknown buttons (user-defined scenes, new firmware
-        # additions) get folded into the catch-all "Unknown" slot so they
-        # still trigger automations via the attributes.
-        event_type = name if name in KNOWN_BUTTONS else "Unknown"
-        if event_type == "Unknown" and "Unknown" not in self._attr_event_types:
-            self._attr_event_types = [*self._attr_event_types, "Unknown"]
         self._trigger_event(
-            event_type,
+            name,
             {
                 "name": name,
                 "kind": frame.get("kind"),
@@ -102,27 +102,26 @@ class LydbroButtonEvent(_LydbroEventBase):
 
 
 class LydbroMenuEvent(_LydbroEventBase):
-    """Vendor-menu selections from the remote's custom UI."""
+    """Vendor-menu selections from the remote's custom UI.
 
-    _attr_event_types: list[str] = []
+    Menu labels are user-configured on the bridge, so we declare a
+    generic "Menu" event_type up-front and rely on the ``name``
+    attribute for automation filtering. Users who want per-menu-item
+    triggers can match on ``trigger.event.data.name``.
+    """
 
     def __init__(self, coordinator: LydbroCoordinator) -> None:
         super().__init__(coordinator, "menu")
-        # Menu labels are user-configured, so we learn them at runtime
-        # rather than declaring them up-front.
         self._attr_event_types = ["Menu"]
 
     @callback
     def _handle_frame(self, frame: dict[str, Any]) -> None:
         if frame.get("type") != "menu_selection":
             return
-        name = frame.get("name") or "Menu"
-        if name not in self._attr_event_types:
-            self._attr_event_types = [*self._attr_event_types, name]
         self._trigger_event(
-            name,
+            "Menu",
             {
-                "name": name,
+                "name": frame.get("name"),
                 "source": frame.get("source"),
                 "id": frame.get("id"),
                 "mode": frame.get("mode"),
@@ -135,10 +134,10 @@ class LydbroSceneEvent(_LydbroEventBase):
     """The four corner scene buttons (N/E/S/W)."""
 
     _attr_device_class = EventDeviceClass.BUTTON
-    _attr_event_types = ["N", "E", "S", "W"]
 
     def __init__(self, coordinator: LydbroCoordinator) -> None:
         super().__init__(coordinator, "scene")
+        self._attr_event_types = ["N", "E", "S", "W"]
 
     @callback
     def _handle_frame(self, frame: dict[str, Any]) -> None:
