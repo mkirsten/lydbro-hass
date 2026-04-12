@@ -15,7 +15,33 @@ Native Home Assistant integration for [Lydbro](https://lydbro.com) devices —
 control and automate your Bang & Olufsen BeoRemote One through a **Lydbro One**
 bridge.
 
-Local, push-based, no cloud, no polling, no YAML required.
+Local, push-based, no cloud, no polling, no YAML required. Declared
+against Home Assistant's integration quality scale at **Platinum** —
+the full quality bar including Bronze setup, Silver reliability, Gold
+UX and Platinum strict typing + async purity — and backed by a
+[100% covered](https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml)
+test suite that runs the real client code against a fake bridge
+over loopback on every push.
+
+## Contents
+
+- [What this integration gives you](#what-this-integration-gives-you)
+  - [Entities](#entities-per-lydbro-one-device)
+  - [Device triggers](#device-triggers)
+  - [Services](#services)
+  - [How data arrives](#how-data-arrives)
+  - [Common use cases](#common-use-cases)
+- [Supported devices](#supported-devices)
+- [Installation](#installation)
+- [Requirements](#requirements)
+- [Automation examples](#automation-examples)
+- [Repair notifications](#repair-notifications)
+- [Diagnostics](#diagnostics)
+- [Troubleshooting](#troubleshooting)
+- [Known limitations](#known-limitations)
+- [Protocol reference](#protocol-reference)
+- [Migrating from MQTT](#migrating-from-mqtt)
+- [License](#license)
 
 ---
 
@@ -27,6 +53,8 @@ typically under 50 ms. Events arrive over a single persistent TCP
 connection; commands flow back through the same socket.
 
 ### Entities (per Lydbro One device)
+
+**Enabled by default:**
 
 | Platform | Entity | Notes |
 |---|---|---|
@@ -43,6 +71,18 @@ connection; commands flow back through the same socket.
 | `button` | Rescan discovery | Trigger an mDNS rescan for Sonos / TVs / HA on the LAN. |
 | `button` | Disconnect BeoRemote | Drop the BLE link and re-pair. |
 | `remote` | BeoRemote | Virtual remote — `remote.send_command` fires a BeoRemote key press without needing the physical remote. `is_on` tracks the BLE link. |
+
+**Disabled by default** — enable the ones you need from the device
+page in HA. They're off by default so the device card stays
+uncluttered for users who drive everything from automations and
+don't need dashboard wiring:
+
+| Platform | Entity | Notes |
+|---|---|---|
+| `sensor` | Last button press | Timestamp (`device_class: timestamp`) of the most recent BeoRemote press, with `name` / `kind` / `mode` as attributes. Perfect for a "last activity" card. |
+| `sensor` | Current mode | Enum (`music` / `tv` / `radio` / `homemedia` / `games` / `control`). Tracks whichever mode the remote was last observed in. Good for dashboard conditionals — show different cards based on what the user is doing. |
+| `sensor` | IP address | Diagnostic — the bridge's LAN address, for when you need to open its web UI from an automation. |
+| `button` | Play / Pause / Stop / Next / Previous / Volume Up / Volume Down / Mute / Power / Home / Back / Menu | 12 virtual remote-key buttons — one per common BeoRemote button. Pressing each fires `send_remote_key` with the matching key, so you can drag e.g. **Play** onto a Lovelace card without scripting. |
 
 ### Device triggers
 
@@ -160,6 +200,16 @@ go when something is off.
 2. Restart Home Assistant
 3. Add the integration from **Settings → Devices & Services**
 
+### Changing the bridge's address
+
+DHCP occasionally moves the bridge between reboots. Rather than
+deleting and re-adding the integration (which would orphan any
+automations keyed to the device's registry id), use **Settings →
+Devices & Services → Lydbro → ⋮ → Reconfigure** to update the host
+or port in place. The flow re-probes the new address and refuses
+to point the existing entry at a different physical bridge — safe
+to run even if you misremember where the device moved to.
+
 ### Removing the integration
 
 1. **Settings → Devices & Services → Lydbro**, click the three-dot
@@ -180,10 +230,19 @@ directory, so removing the entry leaves no stray state behind.
 
 ## Requirements
 
-- Home Assistant **2024.10** or newer
-- A **Lydbro One** bridge running a firmware release that supports the
-  Native TCP v1 transport (the bridge's config UI at `http://<bridge-ip>/`
-  must have *HA integration → Native TCP* selected)
+- **Home Assistant 2024.12 or newer.** The integration uses
+  `entry.runtime_data` (2024.4+), `quality_scale` in the manifest
+  (2024.12+), and strict-typed async patterns that depend on HA's
+  2024-era helpers. It's tested against 2026.2 in CI and deployed
+  against 2026.4 in the field; a clean slate on 2024.12 should
+  work but isn't actively exercised.
+- **Python 3.13 or newer** on the HA side — already satisfied by
+  any modern HA install.
+- **A Lydbro One bridge** on firmware ≥ `0.11.9.3` with the Native
+  TCP v1 transport selected. The bridge's config UI at
+  `http://<bridge-ip>/` must have *HA integration → Native TCP* on
+  — this integration does not speak MQTT or Webhook and won't
+  connect to a bridge in the other modes.
 
 ---
 
@@ -253,6 +312,37 @@ scenes — lives in [`examples/automation-beoremote-control.yaml`](examples/auto
 
 ---
 
+## Repair notifications
+
+The integration raises a handful of HA repair issues automatically
+when something is wrong — they show up in **Settings → Repairs**
+and clear themselves the moment the condition recovers. No
+dashboards or automations needed:
+
+- **Safe mode** (severity `error`) — the bridge rebooted into safe
+  mode after repeated crashes. The notification includes a link to
+  the bridge's web UI so you can fix the configuration and reboot.
+- **Low battery** (severity `warning`) — the paired BeoRemote One
+  is at or below 10%. Hysteresis: the notification clears once the
+  battery recovers past 15%, so a remote bouncing around the
+  threshold doesn't flap the notification on and off.
+- **BeoRemote out of range** (severity `warning`) — the BLE link
+  has been down for more than 5 minutes. Short drops when the
+  remote sleeps are normal and don't fire this.
+
+---
+
+## Diagnostics
+
+On the device page in HA, the **Download Diagnostics** button
+produces a JSON dump of the live coordinator state — the hello
+frame, the current state snapshot, and the connection bookkeeping.
+Attach that to a bug report instead of copy-pasting from logs;
+there's nothing sensitive in it (no credentials, no tokens, just
+LAN IPs of discovered Sonos / TVs) so you don't need to redact.
+
+---
+
 ## Troubleshooting
 
 - **Integration loads but stays "unavailable"** — verify the bridge has
@@ -264,15 +354,19 @@ scenes — lives in [`examples/automation-beoremote-control.yaml`](examples/auto
   the state (last-fired timestamp) and `event_type` attribute should
   update within a second. If they don't, the bridge isn't receiving BLE
   events — debug on the device itself.
-- **Duplicate devices after reconfiguring** — each bridge is keyed by
-  its MAC address, so re-running the config flow on the same device
-  just updates the host.
+- **Bridge moved to a new IP** — use **Reconfigure** on the device
+  card (see *Changing the bridge's address* under Installation)
+  rather than deleting and re-adding. Reconfigure preserves the
+  device registry id, so any automations keyed to it keep working.
 - **Enabling debug logs** — add to `configuration.yaml`:
   ```yaml
   logger:
     logs:
       custom_components.lydbro: debug
   ```
+- **Filing a bug** — grab **Download Diagnostics** from the device
+  page (see above) and attach it to the issue. That's the fastest
+  path to a diagnosis.
 
 ---
 
