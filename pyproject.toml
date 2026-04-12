@@ -1,0 +1,37 @@
+[project]
+name = "lydbro-hass"
+version = "0.1.0"
+description = "Home Assistant custom integration for the Lydbro One BeoRemote bridge"
+requires-python = ">=3.13"
+
+# This project is distributed via HACS, not PyPI — there is no wheel.
+# pyproject.toml exists solely to host tool configuration (pytest,
+# ruff, mypy) in one place. Dev dependencies live in
+# requirements-dev.txt so ``pip install -r requirements-dev.txt``
+# works in a plain venv without a build step.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+# pytest-homeassistant-custom-component provides fixtures via its own
+# plugin; no explicit conftest import needed.
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--tb=short",
+]
+filterwarnings = [
+    # HA itself raises a lot of DeprecationWarnings in test runs —
+    # downgrading them to warnings keeps the test output readable.
+    "default::DeprecationWarning",
+    "default::PendingDeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]  # long lines are fine when they carry context

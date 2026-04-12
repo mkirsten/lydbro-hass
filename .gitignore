@@ -12,3 +12,9 @@ __pycache__/
 
 # Local secrets — never commit tokens
 .env
+
+# Dev venv and pytest caches
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
