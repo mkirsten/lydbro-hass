@@ -103,6 +103,56 @@ class LydbroConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user", data_schema=schema, errors=errors
         )
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Let the user change host/port without removing the entry.
+
+        DHCP can move the device between reboots. Rather than forcing a
+        delete-and-re-add (which would orphan automations keyed to the
+        device registry id), this flow re-probes the supplied address
+        and updates the existing entry in place. The probed hello must
+        carry the same ``id`` as the configured entry — we refuse to
+        point an existing entry at a different physical device, because
+        that would silently break unique_id invariants and entity links.
+        """
+        entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            host = user_input[CONF_HOST]
+            port = user_input.get(CONF_PORT, DEFAULT_PORT)
+            try:
+                hello = await _probe(host, port)
+            except LydbroProtocolError as err:
+                _LOGGER.debug("lydbro reconfigure probe failed: %s", err)
+                errors["base"] = "cannot_connect"
+            else:
+                probed_id = hello.get("id") or host
+                if probed_id != entry.data.get("device_id"):
+                    errors["base"] = "wrong_device"
+                else:
+                    return self.async_update_reload_and_abort(
+                        entry,
+                        data_updates={
+                            CONF_HOST: host,
+                            CONF_PORT: port,
+                            "fw_version": hello.get("fw"),
+                        },
+                    )
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_HOST, default=entry.data.get(CONF_HOST, "")): str,
+                vol.Optional(
+                    CONF_PORT, default=entry.data.get(CONF_PORT, DEFAULT_PORT)
+                ): int,
+            }
+        )
+        return self.async_show_form(
+            step_id="reconfigure", data_schema=schema, errors=errors
+        )
+
     async def async_step_zeroconf(
         self, discovery_info: ZeroconfServiceInfo
     ) -> ConfigFlowResult:

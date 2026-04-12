@@ -6,6 +6,7 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
@@ -110,11 +111,22 @@ class LydbroCoordinator:
     # ------------------------------------------------------------------
 
     async def async_send_cmd(self, cmd: str, **args: Any) -> dict[str, Any]:
+        """Forward a command to the bridge.
+
+        Protocol errors are translated into :class:`HomeAssistantError`
+        with a localised ``cmd_failed`` translation key so entity
+        actions and service calls surface a readable message in the
+        HA notification area instead of a raw exception.
+        """
         try:
             return await self._client.send_cmd(cmd, **args)
         except LydbroProtocolError as err:
             _LOGGER.error("lydbro cmd %s failed: %s", cmd, err)
-            raise
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="cmd_failed",
+                translation_placeholders={"cmd": cmd, "error": str(err)},
+            ) from err
 
     # ------------------------------------------------------------------
     # Helpers

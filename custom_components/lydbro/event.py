@@ -18,24 +18,26 @@ from __future__ import annotations
 from typing import Any
 
 from homeassistant.components.event import EventDeviceClass, EventEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, KNOWN_BUTTONS, SIGNAL_EVENT
+from . import LydbroConfigEntry
+from .const import KNOWN_BUTTONS, SIGNAL_EVENT
 from .coordinator import LydbroCoordinator
 from .entity import LydbroEntity
+
+PARALLEL_UPDATES = 0
 
 _LOGGER_NAME = __name__
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: LydbroConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: LydbroCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities(
         [
             LydbroButtonEvent(coordinator),

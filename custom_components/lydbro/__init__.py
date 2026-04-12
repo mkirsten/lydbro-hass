@@ -13,6 +13,8 @@ from .services import async_register_services, async_unregister_services
 
 _LOGGER = logging.getLogger(__name__)
 
+type LydbroConfigEntry = ConfigEntry[LydbroCoordinator]
+
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
@@ -22,35 +24,33 @@ PLATFORMS: list[Platform] = [
 ]
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: LydbroConfigEntry) -> bool:
     """Set up Lydbro from a config entry."""
     coordinator = LydbroCoordinator(hass, entry)
     await coordinator.async_start()
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    entry.runtime_data = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # Services are global; register once when the first entry loads.
-    if len(hass.data[DOMAIN]) == 1:
-        async_register_services(hass)
+    async_register_services(hass)
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: LydbroConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
-        coordinator: LydbroCoordinator = hass.data[DOMAIN].pop(entry.entry_id)
-        await coordinator.async_stop()
-        if not hass.data[DOMAIN]:
+        await entry.runtime_data.async_stop()
+        # Unregister the global services when the last entry unloads.
+        remaining = [e for e in hass.config_entries.async_entries(DOMAIN) if e.entry_id != entry.entry_id]
+        if not remaining:
             async_unregister_services(hass)
-            hass.data.pop(DOMAIN)
     return unload_ok
 
 
-async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+async def _async_update_listener(hass: HomeAssistant, entry: LydbroConfigEntry) -> None:
     """Reload on options change."""
     await hass.config_entries.async_reload(entry.entry_id)

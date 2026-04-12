@@ -2,14 +2,15 @@
 from __future__ import annotations
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from . import LydbroConfigEntry
 from .coordinator import LydbroCoordinator
 from .entity import LydbroEntity
+
+PARALLEL_UPDATES = 0
 
 
 BUTTONS: tuple[tuple[ButtonEntityDescription, str], ...] = (
@@ -42,10 +43,10 @@ BUTTONS: tuple[tuple[ButtonEntityDescription, str], ...] = (
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: LydbroConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: LydbroCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities(
         LydbroButton(coordinator, desc, cmd) for desc, cmd in BUTTONS
     )

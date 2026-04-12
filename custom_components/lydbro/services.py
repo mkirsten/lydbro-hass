@@ -38,21 +38,25 @@ def _coordinator_for(hass: HomeAssistant, call: ServiceCall) -> LydbroCoordinato
     """Resolve a device_id from the call back to a coordinator instance."""
     device_id = call.data[ATTR_DEVICE_ID]
     device = dr.async_get(hass).async_get(device_id)
-    if device is None:
-        raise HomeAssistantError(f"Unknown device {device_id}")
-
-    for ident_domain, ident_value in device.identifiers:
-        if ident_domain != DOMAIN:
-            continue
-        for coordinator in hass.data.get(DOMAIN, {}).values():
-            if coordinator.device_id == ident_value:
+    if device is not None:
+        lydbro_idents = {v for d, v in device.identifiers if d == DOMAIN}
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            coordinator: LydbroCoordinator | None = getattr(entry, "runtime_data", None)
+            if coordinator is not None and coordinator.device_id in lydbro_idents:
                 return coordinator
 
-    raise HomeAssistantError(f"Device {device_id} is not a Lydbro device")
+    raise HomeAssistantError(
+        translation_domain=DOMAIN,
+        translation_key="device_not_found",
+        translation_placeholders={"device_id": device_id},
+    )
 
 
 def async_register_services(hass: HomeAssistant) -> None:
-    """Register all Lydbro services. Called once per HA process."""
+    """Register all Lydbro services. Idempotent across config entries."""
+
+    if hass.services.has_service(DOMAIN, SERVICE_SEND_REMOTE_KEY):
+        return
 
     async def send_remote_key(call: ServiceCall) -> None:
         coord = _coordinator_for(hass, call)
