@@ -14,8 +14,7 @@ Native Home Assistant integration for [Lydbro](https://lydbro.com) devices —
 control and automate your Bang & Olufsen BeoRemote One through a **Lydbro One**
 bridge.
 
-Built on top of the Lydbro One's Native TCP v1 protocol. Local, push-based,
-no cloud, no polling, no YAML.
+Local, push-based, no cloud, no polling, no YAML required.
 
 ---
 
@@ -23,38 +22,50 @@ no cloud, no polling, no YAML.
 
 The moment you press a button on your BeoRemote One, Home Assistant knows
 about it. Latency is on the order of the TCP round-trip on your LAN —
-typically under 50 ms.
+typically under 50 ms. Events arrive over a single persistent TCP
+connection; commands flow back through the same socket.
 
 ### Entities (per Lydbro One device)
 
 | Platform | Entity | Notes |
 |---|---|---|
-| `event` | **Button** | Fires on every physical press. `event_type` is the button name (`Play`, `Next`, `Home`…), with `kind` (`click` / `hold` / `release` / `double`) and `mode` (`MUSIC` / `TV` / …) as attributes. |
-| `event` | **Menu** | Fires when the user picks an item from the remote's vendor menu. |
-| `event` | **Scene** | Fires when one of the four corner scene buttons (N/E/S/W) is pressed. |
-| `sensor` | BeoRemote battery | Battery % of the paired BeoRemote One. |
-| `sensor` | Boot phase | Diagnostic — what the device is doing during startup. |
-| `sensor` | Firmware | Reported firmware version from the bridge. |
+| `event` | **Button** | Fires on every physical press. `event_type` is the button name (`Play`, `Next`, `Home`…); `kind` (`click` / `hold` / `release` / `double`) and `mode` (`MUSIC` / `TV` / …) come through as attributes. |
+| `event` | **Menu** | Fires when the user picks an item from the remote's vendor menu. `name` and `source` identify the menu and item. |
+| `event` | **Scene** | Fires when one of the four corner scene buttons is pressed. `event_type` is the physical position: `top_left`, `top_right`, `bottom_left`, `bottom_right`. |
+| `sensor` | BeoRemote battery | Battery % of the paired BeoRemote One (device class `battery`). |
+| `sensor` | Boot phase | Diagnostic — what the bridge is doing during startup. |
+| `sensor` | Firmware | Reported firmware version of the bridge. |
 | `binary_sensor` | BeoRemote link | `connectivity` — is a BeoRemote currently paired over BLE. |
 | `binary_sensor` | Ethernet | Diagnostic. |
 | `binary_sensor` | Safe mode | `problem` — fires if the bridge has entered crash-loop safe mode. |
 | `button` | Reboot | Reboot the bridge. |
 | `button` | Rescan discovery | Trigger an mDNS rescan for Sonos / TVs / HA on the LAN. |
 | `button` | Disconnect BeoRemote | Drop the BLE link and re-pair. |
+| `remote` | BeoRemote | Virtual remote — `remote.send_command` fires a BeoRemote key press without needing the physical remote. `is_on` tracks the BLE link. |
+
+### Device triggers
+
+Every button × kind combination and every scene position is registered
+as a Home Assistant **device trigger**, so the automation editor shows a
+point-and-click dropdown for each bridge:
+
+> Device: *Lab Beoremote One* → Trigger type: *Play button (held)*
+
+No YAML required for the common cases. Under the hood each device
+trigger wraps a `lydbro_button` / `lydbro_scene` / `lydbro_menu` bus
+event with the right filters.
 
 ### Services
 
-Use these from automations to drive music, TVs, and other devices through
-the bridge (rather than running them via HA's own integrations):
+For the things that benefit from structured arguments, the integration
+also registers a set of services. All of them take a `device_id` so you
+can target a specific bridge when you run more than one:
 
 - `lydbro.send_remote_key` — inject a virtual BeoRemote key press
 - `lydbro.tv_send_key` / `lydbro.tv_launch_app` — Samsung Tizen or LG webOS
 - `lydbro.sonos_play_uri` / `lydbro.sonos_play_spotify` / `lydbro.sonos_play_favorite`
 - `lydbro.sonos_set_volume` / `lydbro.sonos_adjust_volume` / `lydbro.sonos_join`
 - `lydbro.rescan_discovery`
-
-All services take a `device_id` so you can target a specific bridge when
-you run more than one.
 
 ---
 
@@ -68,7 +79,7 @@ you run more than one.
 4. Restart Home Assistant
 5. Your Lydbro One should pop up under **Settings → Devices & Services →
    Discovered**. If it doesn't, add it manually via **+ Add Integration →
-   Lydbro** and type its IP.
+   Lydbro** and enter its IP.
 
 ### Manually
 
@@ -81,10 +92,9 @@ you run more than one.
 ## Requirements
 
 - Home Assistant **2024.10** or newer
-- A **Lydbro One** bridge running firmware **0.11.9** or newer, with its
-  HA transport set to **Native TCP** (the default). MQTT and Webhook
-  transports are not used by this integration — they're kept around for
-  users who prefer plain MQTT.
+- A **Lydbro One** bridge running a firmware release that supports the
+  Native TCP v1 transport (the bridge's config UI at `http://<bridge-ip>/`
+  must have *HA integration → Native TCP* selected)
 
 ---
 
@@ -92,12 +102,15 @@ you run more than one.
 
 ### "Play" button on the BeoRemote → resume Sonos
 
+Simple event-entity trigger. No kind filter, so this fires on clicks,
+holds and doubles alike:
+
 ```yaml
 automation:
   - alias: BeoRemote Play resumes Sonos
     triggers:
       - trigger: state
-        entity_id: event.lydbro_one_button
+        entity_id: event.lab_beoremote_one_button
         attribute: event_type
         to: "Play"
     actions:
@@ -108,75 +121,101 @@ automation:
 
 ### Hold the Red button → "good night" script
 
+For kind-sensitive triggers, listen to the `lydbro_button` bus event
+directly so you can filter on `kind` in `event_data`:
+
 ```yaml
 automation:
   - alias: BeoRemote Red hold → good night
     triggers:
       - trigger: event
-        event_type: state_changed
+        event_type: lydbro_button
         event_data:
-          entity_id: event.lydbro_one_button
-    conditions:
-      - "{{ trigger.event.data.new_state.attributes.event_type == 'Red' }}"
-      - "{{ trigger.event.data.new_state.attributes.kind == 'hold' }}"
+          name: Red
+          kind: hold
     actions:
       - action: script.good_night
 ```
 
-### Scene button → scene activation
+### Scene corner button → scene activation
+
+Four positions: `top_left`, `top_right`, `bottom_left`, `bottom_right`.
+You can trigger on the event entity's attribute, or — for a nicer
+editor experience — pick the device trigger *Scene: top_left* from the
+Automations UI:
 
 ```yaml
 automation:
-  - alias: BeoRemote scene N → movie mode
+  - alias: BeoRemote top-left scene → movie mode
     triggers:
       - trigger: state
-        entity_id: event.lydbro_one_scene
+        entity_id: event.lab_beoremote_one_scene
         attribute: event_type
-        to: "N"
+        to: "top_left"
     actions:
       - action: scene.turn_on
         target:
           entity_id: scene.movie_mode
 ```
 
+A full worked example — porting a real MQTT automation to the native
+transport, including TV menu dispatch, Samsung key mapping and corner
+scenes — lives in [`examples/automation-beoremote-control.yaml`](examples/automation-beoremote-control.yaml).
+
 ---
 
 ## Troubleshooting
 
 - **Integration loads but stays "unavailable"** — verify the bridge has
-  the **Native TCP** transport selected (not MQTT) in its config UI at
-  `http://<bridge-ip>/`. Native TCP is the default on firmware ≥0.11.x.
-- **No buttons triggering** — check the `event.lydbro_one_button` entity
-  in **Developer Tools → States**. Press a button on the remote; the
-  `last_event_type` attribute should update within a second. If it
-  doesn't, the bridge isn't receiving BLE events — debug on the device
-  itself.
+  the **Native TCP** transport selected in its config UI at
+  `http://<bridge-ip>/`. If it's set to MQTT or Webhook, the native TCP
+  server is torn down and this integration can't connect.
+- **No buttons triggering** — check the `event.lab_beoremote_one_button`
+  entity in **Developer Tools → States**. Press a button on the remote;
+  the state (last-fired timestamp) and `event_type` attribute should
+  update within a second. If they don't, the bridge isn't receiving BLE
+  events — debug on the device itself.
 - **Duplicate devices after reconfiguring** — each bridge is keyed by
   its MAC address, so re-running the config flow on the same device
   just updates the host.
+- **Enabling debug logs** — add to `configuration.yaml`:
+  ```yaml
+  logger:
+    logs:
+      custom_components.lydbro: debug
+  ```
 
 ---
 
 ## Protocol reference
 
-The integration speaks Lydbro Native TCP v1. The spec lives in the
-firmware repo: [`products/lydbro-one-esp32/adapters/adapter_native_tcp.h`][protocol-src].
+The integration speaks **Lydbro Native TCP v1**: persistent line-delimited
+JSON over TCP port 6204.
 
-Short summary: persistent TCP on port 6204, line-delimited JSON, server
-pushes `hello` → client replies `hello_ack` → server sends `state`
-snapshot and then streams `event` frames. Commands travel as `cmd`
-frames with a client id, server replies with matching `result`.
+- Server sends a `hello` frame on connect (`{t, v, fw, branch, id, name, caps}`)
+- Client replies with `hello_ack`
+- Server pushes an initial `state` snapshot, then streams `event` frames
+- Commands travel client → server as `cmd` frames with a client-chosen `id`;
+  server replies with a matching `result` frame
+- Keepalive: `ping` / `pong` every 10 s while idle, 30 s silent drop
+
+Event types emitted: `button_press`, `button_release`, `menu_selection`,
+`scene_button`, `state_change`, `boot_phase`.
+
+Discovery: mDNS `_lydbro._tcp` with TXT records `id`, `model`, `version`,
+`name`, `proto_v`.
+
+---
+
+## Migrating from MQTT
+
+If you previously drove Home Assistant automations off the
+`lydbro-one/out` MQTT topic, see
+[`docs/MIGRATING_FROM_MQTT.md`](docs/MIGRATING_FROM_MQTT.md) for the
+field-by-field mapping and a template conversion guide.
 
 ---
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
-
-[hacs]: https://github.com/hacs/integration
-[hacs-badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg
-[validate]: https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml
-[validate-badge]: https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml/badge.svg
-[release]: https://github.com/mkirsten/lydbro-hass/releases
-[release-badge]: https://img.shields.io/github/v/release/mkirsten/lydbro-hass?include_prereleases
-[protocol-src]: https://github.com/mkirsten/lydbro-code/blob/master/products/lydbro-one-esp32/adapters/adapter_native_tcp.h

@@ -1,7 +1,6 @@
 {
   "domain": "lydbro",
   "name": "Lydbro",
-  "version": "0.1.0",
   "codeowners": ["@mkirsten"],
   "config_flow": true,
   "dependencies": [],
@@ -10,5 +9,6 @@
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/mkirsten/lydbro-hass/issues",
   "requirements": [],
+  "version": "0.1.0",
   "zeroconf": ["_lydbro._tcp.local."]
 }
