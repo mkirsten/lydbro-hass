@@ -22,21 +22,23 @@ from homeassistant.components.remote import (
     RemoteEntity,
     RemoteEntityFeature,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, KNOWN_BUTTONS
+from . import LydbroConfigEntry
+from .const import KNOWN_BUTTONS
 from .coordinator import LydbroCoordinator
 from .entity import LydbroEntity
+
+PARALLEL_UPDATES = 0
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: LydbroConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: LydbroCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities([LydbroRemote(coordinator)])
 
 

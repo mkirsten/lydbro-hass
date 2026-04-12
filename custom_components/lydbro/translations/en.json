@@ -12,13 +12,31 @@
       "discovery_confirm": {
         "title": "Lydbro One discovered",
         "description": "Do you want to add **{name}** at `{host}` to Home Assistant?"
+      },
+      "reconfigure": {
+        "title": "Reconfigure Lydbro One",
+        "description": "Update the address of the bridge. The device must be the same physical unit that was originally configured.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        }
       }
     },
     "error": {
-      "cannot_connect": "Could not connect to the Lydbro One bridge. Check that the device is powered, on the network, and that the Native TCP transport is selected in its config UI."
+      "cannot_connect": "Could not connect to the Lydbro One bridge. Check that the device is powered, on the network, and that the Native TCP transport is selected in its config UI.",
+      "wrong_device": "The bridge at that address reports a different device id. Reconfigure can only update the address of the same physical device."
     },
     "abort": {
-      "already_configured": "This Lydbro One device is already configured."
+      "already_configured": "This Lydbro One device is already configured.",
+      "reconfigure_successful": "Lydbro One address updated."
+    }
+  },
+  "exceptions": {
+    "cmd_failed": {
+      "message": "Lydbro command '{cmd}' failed: {error}"
+    },
+    "device_not_found": {
+      "message": "Device {device_id} is not a Lydbro device."
     }
   },
   "entity": {

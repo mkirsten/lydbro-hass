@@ -24,8 +24,8 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **docs-actions** — `services.yaml` documents every service
 - [x] **docs-high-level-description** — README top
 - [x] **docs-installation-instructions** — README Installation section
-- [ ] **runtime-data** — switch from `hass.data[DOMAIN][entry_id]` to typed `entry.runtime_data: LydbroCoordinator` (HA 2024.4+ pattern). One-line change per file but touches most platforms.
-- [ ] **action-exceptions** — services should raise `HomeAssistantError` / `ServiceValidationError` with translation keys when the command fails, not bubble the raw `LydbroProtocolError`
+- [x] **runtime-data** — switched from `hass.data[DOMAIN][entry_id]` to typed `entry.runtime_data: LydbroCoordinator`; services now resolve coordinators via `config_entries.async_entries(DOMAIN)`.
+- [x] **action-exceptions** — `coordinator.async_send_cmd` now translates `LydbroProtocolError` into `HomeAssistantError` with the `cmd_failed` translation key; services and entity actions both benefit
 - [ ] **config-flow-test-coverage** — need a test suite. This is the single biggest item; see *Tests* section below
 - [ ] **docs-removal-instructions** — add a "Removing the integration" section to README
 
@@ -38,7 +38,7 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **reauthentication-flow** — N/A, no authentication
 - [x] **docs-configuration-parameters** — N/A, no YAML config
 - [x] **docs-installation-parameters** — README
-- [ ] **parallel-updates** — set `PARALLEL_UPDATES = 0` in each platform file since we're push-based; default (1) serialises updates unnecessarily
+- [x] **parallel-updates** — `PARALLEL_UPDATES = 0` set in every platform file (push-based, no serialisation needed)
 - [ ] **test-coverage-above-95%** — blocked on the test suite bootstrap
 
 ## Gold — polished UX and full HA citizen
@@ -52,13 +52,13 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **entity-device-class** — battery, connectivity, problem, button
 - [x] **entity-disabled-by-default** — `ip_address` sensor disabled by default as an example; more candidates in the binary sensors
 - [x] **entity-translations** — `strings.json` + `translations/en.json`
-- [ ] **diagnostics** — add `diagnostics.py` so users can one-click download a redacted state dump for bug reports. Should include: hello dict, state dict, ntcp counters, last ~50 log lines. Redact nothing sensitive (there's nothing sensitive in this device).
-- [ ] **reconfiguration-flow** — add an options flow that lets the user change host/port without removing and re-adding the entry. Useful when DHCP moves the device. Gold requires this in addition to the initial config_flow.
+- [x] **diagnostics** — `diagnostics.py` exports entry/connection/hello/state via the HA diagnostics download flow; nothing sensitive so no redaction
+- [x] **reconfiguration-flow** — `async_step_reconfigure` lets the user update host/port in place; refuses to point an entry at a different physical device (id mismatch)
 - [ ] **repair-issues** — raise `homeassistant.helpers.issue_registry.async_create_issue` when:
   - device reports `safe_mode=true` → severity `error`, action: link to the config UI
   - firmware version is older than a known-good minimum → severity `warning`
   - BLE link has been down for more than N minutes → severity `warning`
-- [ ] **exception-translations** — translate `HomeAssistantError` messages via `translation_key` + `translation_placeholders` so non-English users see localised errors in notifications
+- [x] **exception-translations** — `cmd_failed` and `device_not_found` errors use `translation_domain` + `translation_key` + `translation_placeholders`; English strings in `strings.json` and `translations/en.json`
 - [ ] **icon-translations** — ship `icons.json` to override entity icons without hard-coding `_attr_icon` strings (e.g. mdi:remote for the remote entity, mdi:remote-tv for the Button event)
 - [ ] **stale-devices** — N/A (single device per entry), document the N/A decision
 - [ ] **dynamic-devices** — N/A (single device per entry)

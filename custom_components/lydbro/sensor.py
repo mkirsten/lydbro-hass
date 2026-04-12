@@ -10,14 +10,15 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from . import LydbroConfigEntry
 from .coordinator import LydbroCoordinator
 from .entity import LydbroEntity
+
+PARALLEL_UPDATES = 0
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -60,10 +61,10 @@ SENSORS: tuple[LydbroSensorDescription, ...] = (
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: LydbroConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: LydbroCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities(LydbroSensor(coordinator, desc) for desc in SENSORS)
 
 
