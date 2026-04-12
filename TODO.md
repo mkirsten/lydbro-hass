@@ -26,7 +26,7 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **docs-installation-instructions** — README Installation section
 - [x] **runtime-data** — switched from `hass.data[DOMAIN][entry_id]` to typed `entry.runtime_data: LydbroCoordinator`; services now resolve coordinators via `config_entries.async_entries(DOMAIN)`.
 - [x] **action-exceptions** — `coordinator.async_send_cmd` now translates `LydbroProtocolError` into `HomeAssistantError` with the `cmd_failed` translation key; services and entity actions both benefit
-- [ ] **config-flow-test-coverage** — need a test suite. This is the single biggest item; see *Tests* section below
+- [x] **config-flow-test-coverage** — `tests/test_config_flow.py` covers user, zeroconf, discovery_confirm, and reconfigure steps against `FakeLydbroServer`
 - [ ] **docs-removal-instructions** — add a "Removing the integration" section to README
 
 ## Silver — reliability and production-ready
@@ -39,7 +39,7 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **docs-configuration-parameters** — N/A, no YAML config
 - [x] **docs-installation-parameters** — README
 - [x] **parallel-updates** — `PARALLEL_UPDATES = 0` set in every platform file (push-based, no serialisation needed)
-- [ ] **test-coverage-above-95%** — blocked on the test suite bootstrap
+- [x] **test-coverage-above-95%** — 49 tests, 95% branch coverage over `custom_components/lydbro`; enforced in CI via `--cov-fail-under=95`
 
 ## Gold — polished UX and full HA citizen
 
@@ -71,27 +71,36 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 
 - [x] **async-dependency** — the only dependency is stdlib asyncio; no blocking deps
 - [x] **inject-websession** — N/A, we use raw TCP
-- [ ] **strict-typing** — add a `mypy.ini` or pyproject mypy config with `strict = True`, annotate every function that currently elides return types or uses `Any` loosely. The client/coordinator are mostly typed; sensors/events/triggers need passes.
+- [x] **strict-typing** — `[tool.mypy] strict = true` in `pyproject.toml` over `custom_components/lydbro`; clean on every file. Enforced in CI via a `mypy` step alongside the pytest job.
 
 ---
 
-## Tests — the missing load-bearing foundation
+## Tests — Silver foundation (done)
 
-The tier system keeps tripping on test coverage. To unblock Silver:
+Bronze/Silver both hinged on a real test suite. As of commit `248908e`:
 
-- [ ] **Bootstrap `tests/`** with `pytest-homeassistant-custom-component` as the fixture provider
-- [ ] **conftest.py**: autouse fixture that enables the lydbro integration, plus a fixture that returns a fake `LydbroClient` the coordinator can use
-- [ ] **Fake server** for integration tests: a simple asyncio TCP server that speaks the v1 protocol so the real client code is exercised end-to-end without mocks
-- [ ] **test_config_flow.py**: cover manual entry (happy path + cannot_connect), zeroconf path, already_configured abort, reconfigure flow (once added)
-- [ ] **test_init.py**: setup_entry, unload_entry, coordinator lifecycle, reconnect backoff
-- [ ] **test_client.py**: hello/hello_ack/state/event/ping/pong/cmd/result round-trips, frame parsing, bad JSON handling, timeout behavior
-- [ ] **test_coordinator.py**: state merging, numeric coercion, dispatcher fan-out, bus event firing
-- [ ] **test_event.py**: each event entity class handles its frame types and ignores the others
-- [ ] **test_device_trigger.py**: trigger attach translates correctly to event-platform triggers
-- [ ] **test_services.py**: every service resolves `device_id`, calls the right cmd, rejects unknown device
-- [ ] **test_remote.py**: send_command forwards to `send_remote_key`; turn_off → `ble_disconnect`
-- [ ] **Coverage target**: 95%+ on everything except the BLE/HID specific paths (those aren't in this repo)
-- [ ] **CI job** in `validate.yml` that runs `pytest --cov` and fails the build if coverage drops below the threshold
+- [x] **Bootstrap** `pyproject.toml` + `requirements-dev.txt` + `tests/` with `pytest-homeassistant-custom-component` (needs Python 3.13 venv)
+- [x] **`tests/conftest.py`** — autouses the custom integration, yields a fresh fake bridge per test (gated on `socket_enabled`)
+- [x] **`tests/fake_server.py`** — `FakeLydbroServer` speaks Native TCP v1 on a loopback port so every test runs against the real `LydbroClient` — no transport mocking
+- [x] **`tests/test_client.py`** — 11 tests: hello/ack/state handshake, event fan-out, state delta, ping/pong, cmd round-trip (ok + server error + timeout), id monotonicity, drop → on_connection(False), malformed-frame recovery, send-while-disconnected rejection
+- [x] **`tests/test_config_flow.py`** — 9 tests: user / zeroconf / discovery_confirm / reconfigure with happy, cannot_connect, already_configured, wrong_device branches
+- [x] **`tests/test_init.py`** — 3 tests: setup/unload lifecycle, `entry.runtime_data` plumbing, setup survives unreachable bridge (entities come up unavailable)
+- [x] **`tests/test_coordinator.py`** — 9 tests: snapshot + delta merge, numeric coercion, `boot_phase` updates, HA bus-event fan-out for button/menu/scene (load-bearing for device triggers), available-flag on drop
+- [x] **`tests/test_services.py`** — 12 tests: every registered service maps to the correct cmd + args, device_not_found and cmd_failed translation keys both wired
+- [x] **`tests/test_device_trigger.py`** — 4 tests: async_get_triggers lists button/scene/menu types, attach + fire runs an automation end-to-end for button/scene/menu
+- [x] **`tests/test_diagnostics.py`** — 1 test: download payload has the 4 top-level keys populated from a live coordinator
+- [x] **Coverage target 95%+** — actual 95% across `custom_components/lydbro`
+- [x] **CI job** — `.github/workflows/validate.yml` runs `pytest --cov --cov-fail-under=95` on every push/PR
+
+**Notable real bug caught by tests:** `LydbroEntity._handle_update`
+called `async_write_ha_state` off the event-loop thread because it
+wasn't decorated `@callback`; HA 2024.x+ raises `RuntimeError` in that
+case. Fix is one decorator, caught by `test_services` the first time
+an entity tried to refresh.
+
+**Remaining tests that would push coverage past 95% but aren't
+gating:** `test_remote.py` (async_send_command forwarding, async_turn_off),
+`test_event.py` (per-frame-type event entity filtering, unknown-name drops).
 
 ---
 
@@ -120,7 +129,7 @@ The tier system keeps tripping on test coverage. To unblock Silver:
 
 ## Quality-of-life items outside the scale
 
-- [ ] **`pyproject.toml`** with ruff, mypy and pytest configs so `pip install -e ".[dev]"` in a dev shell sets everything up
+- [x] **`pyproject.toml`** with pytest + ruff configs (mypy config still pending under Platinum strict-typing)
 - [ ] **Pre-commit hooks** — ruff, mypy, black/ruff-format, yaml-lint
 - [ ] **Screenshot in README** of the integration card + device page
 - [ ] **Translations beyond English** — Swedish, Danish (the Lydbro home turf)

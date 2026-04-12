@@ -17,11 +17,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Any
 
-from homeassistant.components.remote import (
-    ATTR_COMMAND,
-    RemoteEntity,
-    RemoteEntityFeature,
-)
+from homeassistant.components.remote import RemoteEntity, RemoteEntityFeature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 

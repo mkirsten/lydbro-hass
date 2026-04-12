@@ -117,11 +117,16 @@ async def async_attach_trigger(
     else:
         raise ValueError(f"Unknown lydbro trigger type: {trigger_type}")
 
+    # Use plain string keys — the HA-internal event_trigger module
+    # re-exports CONF_PLATFORM / CONF_EVENT_TYPE / CONF_EVENT_DATA but
+    # they aren't in its public (py.typed) surface, so mypy strict
+    # complains about attr-defined on them. The schema accepts the
+    # string keys directly.
     event_config = event_trigger.TRIGGER_SCHEMA(
         {
-            event_trigger.CONF_PLATFORM: "event",
-            event_trigger.CONF_EVENT_TYPE: event_type,
-            event_trigger.CONF_EVENT_DATA: event_data,
+            "platform": "event",
+            "event_type": event_type,
+            "event_data": event_data,
         }
     )
     return await event_trigger.async_attach_trigger(

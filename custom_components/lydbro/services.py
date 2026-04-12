@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import voluptuous as vol
 
+from typing import Any
+
 from homeassistant.const import ATTR_DEVICE_ID
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
@@ -132,7 +134,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         coord = _coordinator_for(hass, call)
         await coord.async_send_cmd("rescan_discovery")
 
-    def _schema(extra: dict) -> vol.Schema:
+    def _schema(extra: dict[Any, Any]) -> vol.Schema:
         return _DEVICE_SCHEMA.extend(extra)
 
     hass.services.async_register(

@@ -35,3 +35,18 @@ target-version = "py313"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 ignore = ["E501"]  # long lines are fine when they carry context
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+# Home Assistant itself publishes a loose py.typed but a lot of its
+# internals return Any — follow_imports=silent keeps those from
+# cascading into our own errors.
+follow_imports = "silent"
+# The tests/ tree is intentionally loose-typed; run strict only on
+# the integration package. Add tests later if we care.
+files = ["custom_components/lydbro"]
+# Third-party libs without type stubs — don't error on imports.
+[[tool.mypy.overrides]]
+module = ["voluptuous.*"]
+ignore_missing_imports = true
