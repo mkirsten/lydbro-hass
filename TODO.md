@@ -119,7 +119,7 @@ gating:** `test_remote.py` (async_send_command forwarding, async_turn_off),
 - [ ] **Sensor for last button press** with timestamp — for dashboards
 - [ ] **Current mode sensor** (MUSIC / TV / RADIO) — for dashboard conditionals
 - [ ] **Sonos media_player wrapping** — a media_player entity per discovered Sonos speaker, letting automations call `media_player.play_media` directly instead of the `lydbro.sonos_*` services
-- [ ] **Battery low repair issue** at <10% — complements the diagnostic sensor
+- [x] **Battery low repair issue** — shipped in `repairs.py`, raises at ≤10% with 15% clear hysteresis (implemented alongside the Gold `repair-issues` item)
 - [ ] **Discovery of multiple Lydbro devices on one LAN** — mostly works now via the unique_id, but test with two bridges
 
 ---
