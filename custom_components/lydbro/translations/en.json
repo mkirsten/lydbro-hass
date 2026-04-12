@@ -33,7 +33,7 @@
   },
   "exceptions": {
     "cmd_failed": {
-      "message": "Lydbro command '{cmd}' failed: {error}"
+      "message": "Lydbro command {cmd} failed: {error}"
     },
     "device_not_found": {
       "message": "Device {device_id} is not a Lydbro device."
