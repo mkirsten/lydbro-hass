@@ -1,0 +1,9 @@
+# Dev dependencies for running the test suite against Home Assistant.
+#
+# pytest-homeassistant-custom-component pins its own homeassistant
+# version — leave the version unpinned so a fresh venv picks up
+# whatever is current. CI pins via a lockfile once we add one.
+pytest>=8.0
+pytest-asyncio>=0.23
+pytest-cov>=5.0
+pytest-homeassistant-custom-component
