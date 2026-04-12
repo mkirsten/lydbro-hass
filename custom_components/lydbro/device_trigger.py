@@ -54,7 +54,10 @@ def _button_trigger_types() -> list[str]:
 
 
 def _scene_trigger_types() -> list[str]:
-    return [f"scene_{pos}" for pos in ("N", "E", "S", "W")]
+    return [
+        f"scene_{pos}"
+        for pos in ("top_left", "top_right", "bottom_left", "bottom_right")
+    ]
 
 
 TRIGGER_TYPES: frozenset[str] = frozenset(

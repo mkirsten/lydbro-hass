@@ -1,0 +1,234 @@
+# Example: BeoRemote One → TV / Scenes / Lights
+#
+# Direct port of a real MQTT-era automation to the lydbro integration's
+# native TCP bus events. Use this as a template: copy into
+# `automations.yaml`, replace `<LYDBRO_DEVICE_ID>` with your HA device
+# id (look up via Developer Tools → Template:
+# `{{ device_id("remote.lab_beoremote_one_beoremote") }}`), rewire the
+# targets (media_player, scene, light) to your own entities, and reload
+# automations.
+#
+# The three top-level triggers are the HA bus events fired by the
+# coordinator for every BeoRemote button / scene / menu event. Filtering
+# happens via `trigger.id` in the action block so the whole flow lives
+# in a single automation rather than three.
+#
+# Supported dispatch cases (mirrors the old MQTT behavior 1:1):
+#   - Scene corner buttons    → HA scenes
+#   - "Scenes" vendor menu    → light toggles
+#   - "TV" vendor menu        → TV app launches / key presses
+#   - TV-mode button presses  → Samsung Frame key map (KEY_VOLUP, …)
+#   - Power hold in TV mode   → media_player.turn_off
+#   - "TV" button in TV mode  → media_player.turn_on when currently off
+- id: lydbro_one_native_control
+  alias: Lydbro One BeoRemote Control (native)
+  description: >
+    Routes BeoRemote One events from the Lydbro integration (native TCP)
+    to HA actions. TV mode → Samsung Frame. Scene corners → Church
+    scenes. Scene menu → light toggles. Music events stay inside the
+    bridge.
+  triggers:
+    - platform: event
+      event_type: lydbro_button
+      event_data:
+        device_id: <LYDBRO_DEVICE_ID>
+      id: button
+    - platform: event
+      event_type: lydbro_scene
+      event_data:
+        device_id: <LYDBRO_DEVICE_ID>
+      id: scene
+    - platform: event
+      event_type: lydbro_menu
+      event_data:
+        device_id: <LYDBRO_DEVICE_ID>
+      id: menu
+  actions:
+    - variables:
+        p: "{{ trigger.event.data }}"
+        name: "{{ p.name | default('') }}"
+        kind: "{{ p.kind | default('click') }}"
+        mode: "{{ p.mode | default('') }}"
+        source: "{{ p.source | default('') }}"
+        position: "{{ p.position | default('') }}"
+    - choose:
+        # ---------- Scene corner buttons ----------
+        - conditions: "{{ trigger.id == 'scene' }}"
+          sequence:
+            - choose:
+                - conditions: "{{ position == 'top_left' }}"
+                  sequence:
+                    - action: scene.turn_on
+                      target:
+                        entity_id: scene.church_all_on
+                - conditions: "{{ position == 'top_right' }}"
+                  sequence:
+                    - action: scene.turn_on
+                      target:
+                        entity_id: scene.church_dinner
+                - conditions: "{{ position == 'bottom_left' }}"
+                  sequence:
+                    - action: scene.turn_on
+                      target:
+                        entity_id: scene.church_off
+                - conditions: "{{ position == 'bottom_right' }}"
+                  sequence:
+                    - action: scene.turn_on
+                      target:
+                        entity_id: scene.church_cozy
+        # ---------- "Scenes" vendor menu → light toggles ----------
+        - conditions: "{{ trigger.id == 'menu' and source == 'scene' }}"
+          sequence:
+            - choose:
+                - conditions: "{{ name | lower == 'spaceballs' }}"
+                  sequence:
+                    - action: light.toggle
+                      target:
+                        entity_id: light.church_spaceballs
+                - conditions: "{{ name | lower == 'led strip' }}"
+                  sequence:
+                    - action: light.toggle
+                      target:
+                        entity_id: light.church_led_strip
+                - conditions: "{{ name | lower == 'church on' }}"
+                  sequence:
+                    - action: scene.turn_on
+                      target:
+                        entity_id: scene.church_all_on
+        # ---------- "TV" vendor menu → Samsung Frame app launches ----------
+        - conditions: "{{ trigger.id == 'menu' and source == 'tv' }}"
+          sequence:
+            - choose:
+                - conditions: "{{ name | lower == 'home' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: send_key
+                        media_content_id: KEY_HOME
+                - conditions: "{{ name | lower == 'art mode' }}"
+                  sequence:
+                    - action: script.church_frame_art_mode
+                - conditions: "{{ name | lower == 'netflix' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: app
+                        media_content_id: "3201907018807"
+                - conditions: "{{ name | lower == 'youtube' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: app
+                        media_content_id: "111299001912"
+                - conditions: "{{ name | lower == 'prime video' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: send_key
+                        media_content_id: KEY_PRIME_VIDEO
+                - conditions: "{{ name | lower == 'disney+' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: app
+                        media_content_id: "3201901017640"
+                - conditions: "{{ name | lower == 'apple tv' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: app
+                        media_content_id: "3201807016597"
+                - conditions: "{{ name | lower == 'spotify' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: app
+                        media_content_id: "3201606009684"
+                - conditions: "{{ name | lower == 'tidal' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: app
+                        media_content_id: 3pSSjXEM3o.TIDAL
+                - conditions: "{{ name | lower == 'svt play' }}"
+                  sequence:
+                    - action: media_player.play_media
+                      target:
+                        entity_id: media_player.church_frame_tv
+                      data:
+                        media_content_type: app
+                        media_content_id: 5exPmCT0nz.svtplay
+        # ---------- Power held in TV mode → turn TV off ----------
+        - conditions: >-
+            {{ trigger.id == 'button' and mode == 'TV'
+               and name == 'Power' and kind == 'hold' }}
+          sequence:
+            - action: media_player.turn_off
+              target:
+                entity_id: media_player.church_frame_tv
+        # ---------- TV button in TV mode → wake TV if off ----------
+        - conditions: >-
+            {{ trigger.id == 'button' and mode == 'TV'
+               and name == 'TV'
+               and is_state('media_player.church_frame_tv', 'off') }}
+          sequence:
+            - action: media_player.turn_on
+              target:
+                entity_id: media_player.church_frame_tv
+        # ---------- TV-mode button presses → Samsung key map ----------
+        - conditions: "{{ trigger.id == 'button' and mode == 'TV' }}"
+          sequence:
+            - variables:
+                key_map:
+                  Volume Up: KEY_VOLUP
+                  Volume Down: KEY_VOLDOWN
+                  Mute: KEY_MUTE
+                  Play: KEY_PLAY
+                  Pause: KEY_PAUSE
+                  Play/Pause: KEY_PAUSE
+                  Next: KEY_FF
+                  Previous: KEY_REWIND
+                  Stop: KEY_STOP
+                  Channel Up: KEY_CHUP
+                  Channel Down: KEY_CHDOWN
+                  Up: KEY_UP
+                  Down: KEY_DOWN
+                  Left: KEY_LEFT
+                  Right: KEY_RIGHT
+                  Select: KEY_ENTER
+                  Back: KEY_RETURN
+                  Home: KEY_HOME
+                  Power: KEY_POWER
+                  Info: KEY_INFO
+                  Menu: KEY_MENU
+                  Red: KEY_RED
+                  Green: KEY_GREEN
+                  Yellow: KEY_YELLOW
+                  Blue: KEY_BLUE
+                samsung_key: "{{ key_map.get(name, '') }}"
+            - condition: template
+              value_template: "{{ samsung_key != '' }}"
+            - action: media_player.play_media
+              target:
+                entity_id: media_player.church_frame_tv
+              data:
+                media_content_type: send_key
+                media_content_id: "{{ samsung_key }}"
+  mode: queued
+  max: 10
