@@ -24,7 +24,7 @@ Reference: <https://developers.home-assistant.io/docs/core/integration-quality-s
 - [x] **docs-actions** — `services.yaml` documents every service
 - [x] **docs-high-level-description** — README top
 - [x] **docs-installation-instructions** — README Installation section
-- [x] **runtime-data** — switch from `hass.data[DOMAIN][entry_id]` to typed `entry.runtime_data: LydbroCoordinator` (HA 2024.4+ pattern). One-line change per file but touches most platforms.
+- [ ] **runtime-data** — switch from `hass.data[DOMAIN][entry_id]` to typed `entry.runtime_data: LydbroCoordinator` (HA 2024.4+ pattern). One-line change per file but touches most platforms.
 - [ ] **action-exceptions** — services should raise `HomeAssistantError` / `ServiceValidationError` with translation keys when the command fails, not bubble the raw `LydbroProtocolError`
 - [ ] **config-flow-test-coverage** — need a test suite. This is the single biggest item; see *Tests* section below
 - [ ] **docs-removal-instructions** — add a "Removing the integration" section to README
