@@ -1,23 +1,56 @@
 """Coordinator — owns the TCP client and fans out state/events to entities."""
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .client import CONNECT_TIMEOUT, LydbroClient, LydbroProtocolError
 from .const import (
     DOMAIN,
+    EVENT_BUS_BUTTON,
+    EVENT_BUS_MENU,
+    EVENT_BUS_SCENE,
+    NUMERIC_STATE_KEYS,
     SIGNAL_CONNECTION,
     SIGNAL_EVENT,
     SIGNAL_STATE_UPDATED,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _coerce_numeric(key: str, value: Any) -> Any:
+    """Normalize state values so sensors don't see int/str drift.
+
+    The firmware encodes numeric fields as ints in full ``state``
+    snapshots but as strings in ``state_change`` events (every value
+    field in a state_change frame is a string). Without this coercion
+    the battery sensor flips between ``50`` and ``"50"`` across the
+    reconnect/poll boundary, and HA's numeric device_class machinery
+    complains.
+    """
+    if key not in NUMERIC_STATE_KEYS or value is None:
+        return value
+    if isinstance(value, (int, float)):
+        return value
+    if isinstance(value, str):
+        try:
+            return int(value)
+        except ValueError:
+            try:
+                return float(value)
+            except ValueError:
+                return None
+    return value
+
+
+def _normalize_state(snapshot: dict[str, Any]) -> dict[str, Any]:
+    return {k: _coerce_numeric(k, v) for k, v in snapshot.items()}
 
 
 class LydbroCoordinator:
@@ -36,8 +69,8 @@ class LydbroCoordinator:
         self.port: int = entry.data.get("port", 6204)
         self.device_id: str = entry.data["device_id"]
 
-        # Latest state snapshot, merged from every `state` and `state_change`
-        # event the server sends. Entities read from this dict directly.
+        # Latest state snapshot, merged from every `state` frame and
+        # `state_change` event the server sends. Entities read it directly.
         self.state: dict[str, Any] = {}
         self.hello: dict[str, Any] = {}
         self.available = False
@@ -61,8 +94,8 @@ class LydbroCoordinator:
         ok = await self._client.wait_connected(CONNECT_TIMEOUT + 2.0)
         if not ok:
             # Don't fail setup — reconnect loop keeps trying in the
-            # background. Entities come up as unavailable until the first
-            # snapshot lands.
+            # background. Entities come up as unavailable until the
+            # first snapshot lands.
             _LOGGER.warning(
                 "lydbro %s:%d did not complete handshake in time; will retry",
                 self.host,
@@ -73,8 +106,7 @@ class LydbroCoordinator:
         await self._client.stop()
 
     # ------------------------------------------------------------------
-    # Commands — thin wrappers so services/entities don't need to know
-    # about the client class directly.
+    # Commands
     # ------------------------------------------------------------------
 
     async def async_send_cmd(self, cmd: str, **args: Any) -> dict[str, Any]:
@@ -85,7 +117,23 @@ class LydbroCoordinator:
             raise
 
     # ------------------------------------------------------------------
-    # Client callbacks — merge state, dispatch to entities
+    # Helpers
+    # ------------------------------------------------------------------
+
+    def _ha_device_id(self) -> str | None:
+        """Look up the HA device-registry id for this bridge.
+
+        Device triggers need the registry id, not the lydbro MAC-based
+        ``device_id``. The device is registered when the first entity
+        platform adds entities, so this returns None until then — we
+        look up lazily on every button press rather than caching.
+        """
+        registry = dr.async_get(self.hass)
+        device = registry.async_get_device(identifiers={(DOMAIN, self.device_id)})
+        return device.id if device else None
+
+    # ------------------------------------------------------------------
+    # Client callbacks
     # ------------------------------------------------------------------
 
     async def _handle_hello(self, frame: dict[str, Any]) -> None:
@@ -99,9 +147,8 @@ class LydbroCoordinator:
         )
 
     async def _handle_state(self, frame: dict[str, Any]) -> None:
-        # Full snapshot — replace, don't merge, so removed keys disappear.
         snapshot = {k: v for k, v in frame.items() if k != "t"}
-        self.state = snapshot
+        self.state = _normalize_state(snapshot)
         self.available = True
         async_dispatcher_send(
             self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
@@ -111,18 +158,18 @@ class LydbroCoordinator:
         etype = frame.get("type")
 
         # state_change events are the device's way of pushing a delta
-        # without re-sending the whole snapshot. Merge into local state.
+        # without re-sending the whole snapshot. Merge into local state,
+        # coercing numeric fields so the sensor layer sees consistent
+        # types across snapshot + delta paths.
         if etype == "state_change":
             name = frame.get("name")
             value = frame.get("value")
             if isinstance(name, str):
-                self.state[name] = value
+                self.state[name] = _coerce_numeric(name, value)
                 async_dispatcher_send(
                     self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
                 )
 
-        # boot_phase events also update the state dict so sensors stay
-        # in sync during the startup splash.
         if etype == "boot_phase":
             phase = frame.get("phase")
             if isinstance(phase, str):
@@ -131,12 +178,26 @@ class LydbroCoordinator:
                     self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id)
                 )
 
-        # Fan out every event to event entities / automations. Even the
-        # state_change / boot_phase ones are forwarded — some users want
-        # to trigger on them directly.
+        # Fan out to dispatcher listeners (event entities).
         async_dispatcher_send(
             self.hass, SIGNAL_EVENT.format(self.entry.entry_id), frame
         )
+
+        # Fire HA bus events for button / menu / scene presses. This is
+        # how device triggers attach — they register an "event" trigger
+        # filtered by event_data.device_id + name + kind, so the bus
+        # event is the load-bearing thing (not just the dispatcher).
+        if etype in ("button_press", "menu_selection", "scene_button"):
+            ha_device_id = self._ha_device_id()
+            if ha_device_id is None:
+                return
+            bus_event = {
+                "button_press": EVENT_BUS_BUTTON,
+                "menu_selection": EVENT_BUS_MENU,
+                "scene_button": EVENT_BUS_SCENE,
+            }[etype]
+            data = {"device_id": ha_device_id, **{k: v for k, v in frame.items() if k != "t"}}
+            self.hass.bus.async_fire(bus_event, data)
 
     async def _handle_connection(self, connected: bool) -> None:
         self.available = connected

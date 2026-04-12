@@ -20,6 +20,18 @@ SIGNAL_STATE_UPDATED: Final = "lydbro_state_updated_{}"
 SIGNAL_EVENT: Final = "lydbro_event_{}"
 SIGNAL_CONNECTION: Final = "lydbro_connection_{}"
 
+# Home Assistant bus events — the load-bearing hook for device triggers.
+# Device triggers register an "event" platform trigger filtered on
+# event_data.device_id + name + kind; the coordinator fires these.
+EVENT_BUS_BUTTON: Final = "lydbro_button"
+EVENT_BUS_MENU: Final = "lydbro_menu"
+EVENT_BUS_SCENE: Final = "lydbro_scene"
+
+# Keys in the state dict whose values must be numeric. Coordinator
+# coerces these on ingest so sensors don't see int/str drift between
+# full snapshots (ints) and state_change deltas (strings).
+NUMERIC_STATE_KEYS: Final = ("battery",)
+
 # BeoRemote One button names — matches hid_client.h EVENT_NAMES table.
 # The firmware may also send numeric "1".."9" (digit presets) and any
 # user-defined scene label — the event entity handles unknown names

@@ -42,6 +42,9 @@
       "button": { "name": "Button" },
       "menu": { "name": "Menu" },
       "scene": { "name": "Scene" }
+    },
+    "remote": {
+      "remote": { "name": "BeoRemote" }
     }
   }
 }

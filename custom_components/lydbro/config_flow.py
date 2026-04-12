@@ -7,9 +7,9 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.components import zeroconf
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
 from .client import CONNECT_TIMEOUT, LydbroClient, LydbroProtocolError
 from .const import DEFAULT_PORT, DOMAIN
@@ -104,7 +104,7 @@ class LydbroConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_zeroconf(
-        self, discovery_info: zeroconf.ZeroconfServiceInfo
+        self, discovery_info: ZeroconfServiceInfo
     ) -> ConfigFlowResult:
         """Handle zeroconf discovery of _lydbro._tcp."""
         host = discovery_info.host
