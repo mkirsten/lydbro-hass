@@ -15,6 +15,31 @@ jobs:
       - name: Hassfest
         uses: home-assistant/actions/hassfest@master
 
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+      - name: Run pytest with coverage floor
+        # --cov-fail-under matches the local coverage we established
+        # (see TODO.md: Silver test-coverage-above-95%). Drop this
+        # floor deliberately if a refactor genuinely reduces the
+        # useful surface, not to make a red build green.
+        run: |
+          python -m pytest tests/ \
+            --cov=custom_components/lydbro \
+            --cov-report=term-missing \
+            --cov-fail-under=95
+
   # HACS validation is intentionally disabled while this repo is
   # private — the hacs/action image can't resolve private repos
   # reliably, and we're not ready to publish to the HACS index yet.
