@@ -1,8 +1,14 @@
-# Lydbro for Home Assistant
+<p align="center">
+  <img src="logo.svg" alt="Lydbro" width="96" height="96">
+</p>
 
-[![hacs][hacs-badge]][hacs]
-[![HA Validate][validate-badge]][validate]
-[![Release][release-badge]][release]
+<h1 align="center">Lydbro for Home Assistant</h1>
+
+<p align="center">
+  <a href="https://github.com/hacs/integration"><img alt="HACS" src="https://img.shields.io/badge/HACS-Custom-41BDF5.svg"></a>
+  <a href="https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml"><img alt="Validate" src="https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml/badge.svg"></a>
+  <a href="https://github.com/mkirsten/lydbro-hass/releases"><img alt="Release" src="https://img.shields.io/github/v/release/mkirsten/lydbro-hass?include_prereleases"></a>
+</p>
 
 Native Home Assistant integration for [Lydbro](https://lydbro.com) devices —
 control and automate your Bang & Olufsen BeoRemote One through a **Lydbro One**

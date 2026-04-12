@@ -1,0 +1,93 @@
+blueprint:
+  name: BeoRemote One → Media Player
+  description: >
+    Wire your Bang & Olufsen BeoRemote One to any Home Assistant
+    media_player entity. Volume, transport, mute and the four digit
+    presets are mapped one-to-one; the remote's TV/Music mode is
+    respected so the same buttons can drive different players.
+  domain: automation
+  source_url: https://github.com/mkirsten/lydbro-hass/blob/main/blueprints/beoremote_media_player.yaml
+  input:
+    lydbro_device:
+      name: Lydbro One bridge
+      description: The Lydbro One device to listen to.
+      selector:
+        device:
+          integration: lydbro
+    media_player:
+      name: Media player
+      description: Which media_player should the remote control.
+      selector:
+        entity:
+          filter:
+            - domain: media_player
+    mode_filter:
+      name: Only react in this remote mode
+      description: >
+        Restrict to presses while the BeoRemote is in this mode.
+        Leave as "any" to react in any mode.
+      default: any
+      selector:
+        select:
+          options:
+            - any
+            - MUSIC
+            - TV
+            - RADIO
+            - HOMEMEDIA
+            - GAMES
+            - CONTROL
+mode: queued
+max: 10
+trigger:
+  - platform: event
+    event_type: lydbro_button
+    event_data:
+      device_id: !input lydbro_device
+condition:
+  - condition: template
+    value_template: >-
+      {{ mode_filter == 'any'
+         or trigger.event.data.mode == mode_filter }}
+action:
+  - variables:
+      name: "{{ trigger.event.data.name }}"
+      kind: "{{ trigger.event.data.kind | default('click') }}"
+  - choose:
+      - conditions: "{{ name == 'Play' or name == 'Play/Pause' }}"
+        sequence:
+          - action: media_player.media_play_pause
+            target:
+              entity_id: !input media_player
+      - conditions: "{{ name == 'Stop' }}"
+        sequence:
+          - action: media_player.media_stop
+            target:
+              entity_id: !input media_player
+      - conditions: "{{ name == 'Next' }}"
+        sequence:
+          - action: media_player.media_next_track
+            target:
+              entity_id: !input media_player
+      - conditions: "{{ name == 'Previous' }}"
+        sequence:
+          - action: media_player.media_previous_track
+            target:
+              entity_id: !input media_player
+      - conditions: "{{ name == 'Volume Up' }}"
+        sequence:
+          - action: media_player.volume_up
+            target:
+              entity_id: !input media_player
+      - conditions: "{{ name == 'Volume Down' }}"
+        sequence:
+          - action: media_player.volume_down
+            target:
+              entity_id: !input media_player
+      - conditions: "{{ name == 'Mute' }}"
+        sequence:
+          - action: media_player.volume_mute
+            target:
+              entity_id: !input media_player
+            data:
+              is_volume_muted: true

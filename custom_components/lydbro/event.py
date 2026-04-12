@@ -131,13 +131,23 @@ class LydbroMenuEvent(_LydbroEventBase):
 
 
 class LydbroSceneEvent(_LydbroEventBase):
-    """The four corner scene buttons (N/E/S/W)."""
+    """The four corner scene buttons on the BeoRemote One.
+
+    Positions match the physical layout and the strings the firmware
+    publishes in ``scene.position``: top_left / top_right / bottom_left /
+    bottom_right.
+    """
 
     _attr_device_class = EventDeviceClass.BUTTON
 
     def __init__(self, coordinator: LydbroCoordinator) -> None:
         super().__init__(coordinator, "scene")
-        self._attr_event_types = ["N", "E", "S", "W"]
+        self._attr_event_types = [
+            "top_left",
+            "top_right",
+            "bottom_left",
+            "bottom_right",
+        ]
 
     @callback
     def _handle_frame(self, frame: dict[str, Any]) -> None:
