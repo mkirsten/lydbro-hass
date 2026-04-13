@@ -76,6 +76,54 @@ async def _connected_client(
 # ---------------------------------------------------------------------------
 
 
+async def test_hello_with_error_field_is_rejected(
+    fake_server: FakeLydbroServer,
+) -> None:
+    """Server can refuse the connection via ``hello.error`` (e.g. too_many_clients)."""
+    fake_server.hello = dict(fake_server.hello, error="too_many_clients")
+
+    recorder = _Recorder()
+    client = LydbroClient(
+        "127.0.0.1",
+        fake_server.port,
+        on_hello=recorder.on_hello,
+        on_state=recorder.on_state,
+        on_event=recorder.on_event,
+        on_connection_change=recorder.on_connection,
+    )
+    await client.start()
+    try:
+        # Handshake must NOT complete — the client raises, the read
+        # loop tears the socket down, and the reconnect loop backs off.
+        assert await client.wait_connected(timeout=0.5) is False
+        assert recorder.connection_changes == []
+    finally:
+        await client.stop()
+
+
+async def test_hello_with_wrong_protocol_version_is_rejected(
+    fake_server: FakeLydbroServer,
+) -> None:
+    """A server on a different wire version is refused before hello_ack."""
+    fake_server.hello = dict(fake_server.hello, v=99)
+
+    recorder = _Recorder()
+    client = LydbroClient(
+        "127.0.0.1",
+        fake_server.port,
+        on_hello=recorder.on_hello,
+        on_state=recorder.on_state,
+        on_event=recorder.on_event,
+        on_connection_change=recorder.on_connection,
+    )
+    await client.start()
+    try:
+        assert await client.wait_connected(timeout=0.5) is False
+        assert recorder.connection_changes == []
+    finally:
+        await client.stop()
+
+
 async def test_hello_ack_state_handshake(fake_server: FakeLydbroServer) -> None:
     """Server hello → client ack → server state → client marked connected."""
     client, recorder = await _connected_client(fake_server)
