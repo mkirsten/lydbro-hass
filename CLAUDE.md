@@ -1,6 +1,6 @@
 # lydbro-hass — Project Instructions
 
-Home Assistant custom integration for the Lydbro One ESP32 bridge. Speaks the **Native TCP v1** protocol on port 6204, push-based — no polling, no MQTT broker. Firmware lives in the separate `~/Development/lydbro-code/` repo under `products/lydbro-one-esp32/`; the wire-format spec is `docs/native_tcp_protocol.md` in that repo.
+Home Assistant custom integration for the Lydbro One ESP32 bridge. Speaks the **Native TCP v2** protocol on port 6204, push-based — no polling, no MQTT broker. Firmware lives in the separate `~/Development/lydbro-code/` repo under `products/lydbro-one-esp32/`; the **canonical wire-format spec is `docs/native_tcp_protocol.md` in this repo** (moved here so third-party clients can read it without firmware-source access — the firmware repo's copy is a one-line pointer).
 
 ## Native TCP protocol + firmware compatibility
 
@@ -10,7 +10,7 @@ This integration is hard-gated on the Native TCP wire version. `PROTOCOL_VERSION
 
 **Breaking changes** (rename or remove a field, change framing) — MUST:
 1. Bump `PROTOCOL_VERSION` here AND `NTCP_PROTO_VERSION` in `lydbro-code`.
-2. Update `docs/native_tcp_protocol.md` in `lydbro-code`.
+2. Update `docs/native_tcp_protocol.md` **in this repo** (it's the canonical spec — the `lydbro-code` copy is a pointer).
 3. Add a new row to the compatibility table in BOTH `README.md` (this repo, "Compatibility" subsection under Requirements) AND `lydbro-code/README.md` ("Home Assistant integration compatibility" section).
 4. Bump `manifest.json` version here (and tag a HACS release) alongside the firmware release.
 

@@ -6,7 +6,7 @@ initial `state` snapshot followed by event frames. Commands travel in
 the other direction as `cmd` frames with a client-chosen `id`; the
 server replies with a `result` frame carrying the same id.
 
-See docs/native_tcp_protocol.md in the firmware repo for the full spec.
+See docs/native_tcp_protocol.md in this repo for the full spec.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 # its own `v` in the hello frame; a mismatch means the wire format
 # itself differs and neither side can recover, so we refuse the
 # connection and let the reconnect loop surface the reason. See
-# docs/native_tcp_protocol.md § Versioning in the firmware repo.
+# docs/native_tcp_protocol.md § Versioning in this repo.
 PROTOCOL_VERSION = 2
 
 PING_INTERVAL = 8.0
