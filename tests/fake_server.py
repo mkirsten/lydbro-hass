@@ -31,8 +31,8 @@ from typing import Any
 
 DEFAULT_HELLO: dict[str, Any] = {
     "t": "hello",
-    "proto": 1,
-    "fw": "0.11.9.3",
+    "v": 2,
+    "fw": "0.13.0",
     "branch": "test",
     "id": "aa:bb:cc:dd:ee:ff",
     "name": "Test Lydbro One",

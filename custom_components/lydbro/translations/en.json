@@ -79,7 +79,7 @@
     },
     "button": {
       "reboot": { "name": "Reboot" },
-      "rescan_discovery": { "name": "Rescan discovery" },
+      "reset_pairing": { "name": "Reset BeoRemote pairing" },
       "ble_disconnect": { "name": "Disconnect BeoRemote" },
       "remote_key_play": { "name": "Play" },
       "remote_key_pause": { "name": "Pause" },

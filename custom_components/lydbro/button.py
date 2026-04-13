@@ -2,9 +2,11 @@
 
 Two flavours of button entity are created per device:
 
-* **Admin** — Reboot / Rescan discovery / Disconnect BeoRemote. These
+* **Admin** — Reboot / Reset pairing / Disconnect BeoRemote. These
   sit under ``EntityCategory.CONFIG`` on the device page and fire
-  bridge-level commands.
+  bridge-level commands. There is deliberately no "rescan discovery"
+  button: the bridge rescans on every boot, so the reboot button
+  already covers that case.
 * **Virtual remote key** — one per entry in
   :data:`const.COMMON_REMOTE_BUTTONS` (Play, Pause, Volume Up, …).
   Each calls :meth:`LydbroCoordinator.async_send_cmd` with
@@ -41,11 +43,11 @@ BUTTONS: tuple[tuple[ButtonEntityDescription, str], ...] = (
     ),
     (
         ButtonEntityDescription(
-            key="rescan_discovery",
-            translation_key="rescan_discovery",
+            key="reset_pairing",
+            translation_key="reset_pairing",
             entity_category=EntityCategory.CONFIG,
         ),
-        "rescan_discovery",
+        "reset_pairing",
     ),
     (
         ButtonEntityDescription(

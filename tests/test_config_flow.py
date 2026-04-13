@@ -89,7 +89,7 @@ async def test_user_flow_happy_path(hass: HomeAssistant, fake_server: FakeLydbro
     assert result["data"][CONF_HOST] == "127.0.0.1"
     assert result["data"][CONF_PORT] == fake_server.port
     assert result["data"]["device_id"] == "aa:bb:cc:dd:ee:ff"
-    assert result["data"]["fw_version"] == "0.11.9.3"
+    assert result["data"]["fw_version"] == "0.13.0"
 
     # Unique id keyed on the MAC-ish id from the hello frame.
     entry = hass.config_entries.async_entries(DOMAIN)[0]

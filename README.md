@@ -103,10 +103,22 @@ also registers a set of services. All of them take a `device_id` so you
 can target a specific bridge when you run more than one:
 
 - `lydbro.send_remote_key` — inject a virtual BeoRemote key press
-- `lydbro.tv_send_key` / `lydbro.tv_launch_app` — Samsung Tizen or LG webOS
-- `lydbro.sonos_play_uri` / `lydbro.sonos_play_spotify` / `lydbro.sonos_play_favorite`
-- `lydbro.sonos_set_volume` / `lydbro.sonos_adjust_volume` / `lydbro.sonos_join`
-- `lydbro.rescan_discovery`
+
+Bridge-level admin actions (**Reboot**, **Reset BeoRemote
+pairing**, **Disconnect BeoRemote**) are exposed as `button`
+entities on the device page rather than services — they're one-off
+actions, not automation inputs.
+
+The integration deliberately does **not** expose TV / Sonos control
+services. The Lydbro One is a bridge *from* the BeoRemote to Sonos /
+TVs / HA — Home Assistant already talks to Sonos and your TV
+directly, so routing those commands through the ESP32 would be a
+detour with no upside. Drive Sonos and TVs from their own HA
+integrations.
+
+There is also no rescan-discovery action: the bridge rescans the
+LAN on every boot, so pressing **Reboot** gives you a fresh device
+list for free.
 
 ### How data arrives
 
@@ -130,10 +142,10 @@ What people actually build with this:
   Up / Vol Down mapped to the currently-selected Sonos zone. The
   bundled [`blueprints/beoremote_media_player.yaml`](blueprints/beoremote_media_player.yaml)
   wires this up in one click.
-- **BeoRemote One → Samsung Frame TV**. Mode-aware dispatch: in
-  `TV` mode the remote directly controls the Frame via
-  `lydbro.tv_send_key`; in `MUSIC` mode the same buttons drive
-  Sonos instead.
+- **BeoRemote One → Samsung Frame TV**. In `TV` mode the bridge
+  drives the Frame directly (Tizen WebSocket from the ESP32); in
+  `MUSIC` mode the same buttons drive Sonos instead. Both paths run
+  on the device — HA just sees the resulting button events.
 - **Corner scene buttons → light scenes**. The four corner
   "scene" buttons on the BeoRemote trigger four different Home
   Assistant scenes, good for "movie mode" / "reading" / "party" /
@@ -238,11 +250,27 @@ directory, so removing the entry leaves no stray state behind.
   work but isn't actively exercised.
 - **Python 3.13 or newer** on the HA side — already satisfied by
   any modern HA install.
-- **A Lydbro One bridge** on firmware ≥ `0.11.9.3` with the Native
+- **A Lydbro One bridge** on firmware ≥ `0.12.3` with the Native
   TCP v1 transport selected. The bridge's config UI at
   `http://<bridge-ip>/` must have *HA integration → Native TCP* on
   — this integration does not speak MQTT or Webhook and won't
   connect to a bridge in the other modes.
+
+### Compatibility
+
+The hard compatibility gate is the **Native TCP protocol version**
+announced in the bridge's `hello` frame. This integration refuses
+to connect if the versions disagree, so a mismatched pair fails
+fast with a readable error rather than silently garbling events.
+
+| lydbro-hass | Lydbro One FW | Protocol |
+|-------------|---------------|----------|
+| 0.2.x       | 0.13.0+       | v2       |
+| 0.1.x       | 0.11.9.3 – 0.12.4 | v1   |
+
+Firmware versions outside a range in the table *may* still work
+since v1 is additive, but haven't been exercised together — if
+you hit something weird, upgrade both sides to the same row.
 
 ---
 

@@ -16,9 +16,11 @@ native integration.
 - **Device triggers.** The automation editor shows a per-button
   dropdown (*"BeoRemote → Play button held"*) instead of requiring you
   to hand-filter MQTT payloads.
-- **Services.** `remote.send_command`, `lydbro.sonos_play_*`,
-  `lydbro.tv_send_key` are all typed and discoverable in Developer
-  Tools.
+- **Services.** `remote.send_command` and `lydbro.send_remote_key`
+  are typed and discoverable in Developer Tools. (The bridge drives
+  Sonos and TVs itself in response to remote presses — HA controls
+  them through its own Sonos / TV integrations, not through
+  Lydbro.)
 
 ## Field mapping
 

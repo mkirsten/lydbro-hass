@@ -83,7 +83,6 @@ async def test_setup_loads_coordinator_and_entities(
 
     # Global services are registered after setup.
     assert hass.services.has_service(DOMAIN, "send_remote_key")
-    assert hass.services.has_service(DOMAIN, "rescan_discovery")
 
 
 async def test_unload_clears_runtime_data_and_services(
@@ -99,7 +98,6 @@ async def test_unload_clears_runtime_data_and_services(
 
     # When the last entry unloads the global services go too.
     assert not hass.services.has_service(DOMAIN, "send_remote_key")
-    assert not hass.services.has_service(DOMAIN, "rescan_discovery")
 
 
 async def test_setup_survives_initial_handshake_failure(

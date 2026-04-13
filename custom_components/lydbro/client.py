@@ -24,6 +24,13 @@ _LOGGER = logging.getLogger(__name__)
 #   NTCP_PING_MS = 10000  (server pings when idle 10s in both directions)
 #   NTCP_IDLE_MS = 30000  (server drops clients silent for 30s)
 # We ping at 8s so we always beat the server's idle clock.
+# Wire-format version this integration speaks. The firmware announces
+# its own `v` in the hello frame; a mismatch means the wire format
+# itself differs and neither side can recover, so we refuse the
+# connection and let the reconnect loop surface the reason. See
+# docs/native_tcp_protocol.md § Versioning in the firmware repo.
+PROTOCOL_VERSION = 2
+
 PING_INTERVAL = 8.0
 READ_TIMEOUT = 25.0
 CONNECT_TIMEOUT = 5.0
@@ -209,8 +216,23 @@ class LydbroClient:
         ftype = frame.get("t")
 
         if ftype == "hello":
+            # The server uses a hello frame with an `error` field to
+            # reject the connection (e.g. too_many_clients — more than
+            # 4 concurrent clients). Don't send hello_ack; surface the
+            # reason and let the read loop observe the peer close.
+            err = frame.get("error")
+            if err:
+                raise LydbroProtocolError(f"server rejected hello: {err}")
+            server_v = frame.get("v")
+            if server_v != PROTOCOL_VERSION:
+                raise LydbroProtocolError(
+                    f"unsupported protocol version: server v={server_v}, "
+                    f"client v={PROTOCOL_VERSION}"
+                )
             await self._on_hello(frame)
-            await self._write_json({"t": "hello_ack"})
+            await self._write_json(
+                {"t": "hello_ack", "v": PROTOCOL_VERSION, "client": "home-assistant"}
+            )
             # Server pushes initial state snapshot right after hello_ack.
             return
 

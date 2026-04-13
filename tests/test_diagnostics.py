@@ -49,7 +49,7 @@ async def test_diagnostics_dump_shape(hass: HomeAssistant, fake_server: FakeLydb
     assert data["connection"]["device_id"] == "aa:bb:cc:dd:ee:ff"
 
     assert data["hello"]["id"] == "aa:bb:cc:dd:ee:ff"
-    assert data["hello"]["fw"] == "0.11.9.3"
+    assert data["hello"]["fw"] == "0.13.0"
 
     assert data["state"]["battery"] == 87
     assert data["state"]["eth_up"] is True

@@ -13,7 +13,7 @@
     },
     "button": {
       "reboot": { "default": "mdi:restart" },
-      "rescan_discovery": { "default": "mdi:magnify-scan" },
+      "reset_pairing": { "default": "mdi:bluetooth-off" },
       "ble_disconnect": { "default": "mdi:bluetooth-off" }
     },
     "event": {
@@ -26,15 +26,6 @@
     }
   },
   "services": {
-    "send_remote_key": { "service": "mdi:remote" },
-    "tv_send_key": { "service": "mdi:television" },
-    "tv_launch_app": { "service": "mdi:television-play" },
-    "sonos_play_uri": { "service": "mdi:speaker" },
-    "sonos_play_spotify": { "service": "mdi:spotify" },
-    "sonos_play_favorite": { "service": "mdi:star" },
-    "sonos_set_volume": { "service": "mdi:volume-high" },
-    "sonos_adjust_volume": { "service": "mdi:volume-plus" },
-    "sonos_join": { "service": "mdi:speaker-multiple" },
-    "rescan_discovery": { "service": "mdi:magnify-scan" }
+    "send_remote_key": { "service": "mdi:remote" }
   }
 }

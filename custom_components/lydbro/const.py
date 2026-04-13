@@ -9,7 +9,7 @@ MANUFACTURER: Final = "Lydbro"
 MODEL_DEFAULT: Final = "Lydbro One"
 
 DEFAULT_PORT: Final = 6204
-PROTOCOL_VERSION: Final = 1
+PROTOCOL_VERSION: Final = 2
 
 CONF_HOST: Final = "host"
 CONF_PORT: Final = "port"

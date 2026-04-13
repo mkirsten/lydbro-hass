@@ -82,7 +82,7 @@ async def test_hello_ack_state_handshake(fake_server: FakeLydbroServer) -> None:
     try:
         assert len(recorder.hellos) == 1
         assert recorder.hellos[0]["id"] == "aa:bb:cc:dd:ee:ff"
-        assert recorder.hellos[0]["fw"] == "0.11.9.3"
+        assert recorder.hellos[0]["fw"] == "0.13.0"
 
         assert len(recorder.states) == 1
         assert recorder.states[0]["battery"] == 87
@@ -202,7 +202,7 @@ async def test_cmd_server_error_raises(fake_server: FakeLydbroServer) -> None:
     client, _ = await _connected_client(fake_server)
     try:
         with pytest.raises(LydbroProtocolError, match="no such device"):
-            await client.send_cmd("tv_send_key", key="HOME")
+            await client.send_cmd("send_remote_key", key="Play")
     finally:
         await client.stop()
 
@@ -228,7 +228,7 @@ async def test_cmd_timeout_when_server_never_replies(
     client, _ = await _connected_client(fake_server)
     try:
         with pytest.raises(LydbroProtocolError, match="timed out"):
-            await client.send_cmd("rescan_discovery")
+            await client.send_cmd("reboot")
     finally:
         await client.stop()
 
@@ -237,9 +237,9 @@ async def test_cmd_ids_increment(fake_server: FakeLydbroServer) -> None:
     """Each send_cmd bumps the client-side id monotonically."""
     client, _ = await _connected_client(fake_server)
     try:
-        await client.send_cmd("rescan_discovery")
-        await client.send_cmd("rescan_discovery")
-        await client.send_cmd("rescan_discovery")
+        await client.send_cmd("reboot")
+        await client.send_cmd("reboot")
+        await client.send_cmd("reboot")
         ids = [f["id"] for f in fake_server.received_cmds]
         assert ids == [1, 2, 3]
     finally:
@@ -303,7 +303,7 @@ async def test_send_cmd_while_disconnected_raises(
             await asyncio.sleep(0.05)
 
         with pytest.raises(LydbroProtocolError, match="not connected"):
-            await client.send_cmd("rescan_discovery")
+            await client.send_cmd("reboot")
     finally:
         await client.stop()
 

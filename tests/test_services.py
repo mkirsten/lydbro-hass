@@ -71,85 +71,6 @@ async def test_send_remote_key_forwards_cmd(
     assert cmds[0]["key"] == "Play"
 
 
-@pytest.mark.parametrize(
-    ("service", "data", "expected_cmd", "expected_args"),
-    [
-        (
-            "tv_send_key",
-            {"key": "HOME", "device_ip": "192.168.0.10", "device_type": "samsung"},
-            "tv_send_key",
-            {"key": "HOME", "device_ip": "192.168.0.10", "device_type": "samsung"},
-        ),
-        (
-            "tv_launch_app",
-            {"app": "Netflix", "device_ip": "192.168.0.10"},
-            "tv_launch_app",
-            {"param": "Netflix", "device_ip": "192.168.0.10", "device_type": ""},
-        ),
-        (
-            "sonos_play_uri",
-            {"uri": "x-sonos-http:foo", "device_ip": "192.168.0.20"},
-            "sonos_play_uri",
-            {"param": "x-sonos-http:foo", "device_ip": "192.168.0.20"},
-        ),
-        (
-            "sonos_play_spotify",
-            {"uri": "spotify:track:abc"},
-            "sonos_play_spotify",
-            {"param": "spotify:track:abc", "device_ip": ""},
-        ),
-        (
-            "sonos_play_favorite",
-            {"favorite": "Morning Jazz"},
-            "sonos_play_favorite",
-            {"param": "Morning Jazz", "device_ip": ""},
-        ),
-        (
-            "sonos_set_volume",
-            {"volume": 35, "device_ip": "192.168.0.20"},
-            "sonos_set_volume",
-            {"volume": 35, "device_ip": "192.168.0.20"},
-        ),
-        (
-            "sonos_adjust_volume",
-            {"delta": -3},
-            "sonos_adjust_volume",
-            {"delta": -3, "device_ip": ""},
-        ),
-        (
-            "sonos_join",
-            {"master_ip": "192.168.0.20"},
-            "sonos_join",
-            {"param": "192.168.0.20", "device_ip": ""},
-        ),
-        ("rescan_discovery", {}, "rescan_discovery", {}),
-    ],
-)
-async def test_service_cmd_mapping(
-    hass: HomeAssistant,
-    fake_server: FakeLydbroServer,
-    service: str,
-    data: dict[str, Any],
-    expected_cmd: str,
-    expected_args: dict[str, Any],
-) -> None:
-    """Each service forwards to the documented cmd with the documented args."""
-    _, device_id = await _setup(hass, fake_server)
-
-    await hass.services.async_call(
-        DOMAIN,
-        service,
-        {ATTR_DEVICE_ID: device_id, **data},
-        blocking=True,
-    )
-
-    assert len(fake_server.received_cmds) == 1
-    frame = fake_server.received_cmds[0]
-    assert frame["cmd"] == expected_cmd
-    for key, value in expected_args.items():
-        assert frame[key] == value, f"{service}: {key}={frame.get(key)!r} != {value!r}"
-
-
 # ---------------------------------------------------------------------------
 # Error paths
 # ---------------------------------------------------------------------------
@@ -249,21 +170,32 @@ async def test_virtual_remote_button_press_forwards_send_remote_key(
     assert cmds[0]["key"] == "Play"
 
 
-async def test_admin_reboot_button_press_forwards_cmd(
-    hass: HomeAssistant, fake_server: FakeLydbroServer
+@pytest.mark.parametrize(
+    ("entity_id", "expected_cmd"),
+    [
+        ("button.test_lydbro_one_reboot", "reboot"),
+        ("button.test_lydbro_one_reset_beoremote_pairing", "reset_pairing"),
+        ("button.test_lydbro_one_disconnect_beoremote", "ble_disconnect"),
+    ],
+)
+async def test_admin_button_press_forwards_cmd(
+    hass: HomeAssistant,
+    fake_server: FakeLydbroServer,
+    entity_id: str,
+    expected_cmd: str,
 ) -> None:
-    """Pressing the Reboot admin button fires the raw ``reboot`` cmd."""
+    """Each admin button maps to its documented wire cmd."""
     await _setup(hass, fake_server)
 
     await hass.services.async_call(
         BUTTON_DOMAIN,
         SERVICE_PRESS,
-        {ATTR_ENTITY_ID: "button.test_lydbro_one_reboot"},
+        {ATTR_ENTITY_ID: entity_id},
         blocking=True,
     )
 
     assert len(fake_server.received_cmds) == 1
-    assert fake_server.received_cmds[0]["cmd"] == "reboot"
+    assert fake_server.received_cmds[0]["cmd"] == expected_cmd
 
 
 async def test_services_only_registered_once_across_multiple_entries(
