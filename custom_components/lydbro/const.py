@@ -33,42 +33,47 @@ EVENT_BUS_SCENE: Final = "lydbro_scene"
 # full snapshots (ints) and state_change deltas (strings).
 NUMERIC_STATE_KEYS: Final = ("battery",)
 
-# BeoRemote One button names — matches hid_client.h EVENT_NAMES table.
-# The firmware may also send numeric "1".."9" (digit presets) and any
-# user-defined scene label — the event entity handles unknown names
-# gracefully, these are just the ones we declare up-front.
+# BeoRemote One button names — canonical set matching hid_client.h output.
+# Firmware publishes exactly these names; unknown names from the server are
+# handled gracefully by the event entity (ignored, not an error).
 KNOWN_BUTTONS: Final = (
-    "Mute",
-    "Power",
+    # Playback
     "Play",
-    "Play/Pause",
+    "Pause",
+    "Next",
     "Fast Forward",
     "Rewind",
-    "Next",
-    "Previous",
-    "Stop",
-    "Home",
-    "Back",
-    "Menu",
+    # Volume
+    "Volume Up",
+    "Volume Down",
+    "Mute",
+    # Power
+    "Power",
+    # Navigation
     "Up",
     "Down",
     "Left",
     "Right",
-    "Select",
+    "Go",
+    "Menu",
+    "Back",
+    "Home",
+    # Info / Guide
+    "Info",
+    "Guide",
+    # Source / Mode
+    "Music",
+    "TV",
+    "List",
+    # Channel
+    "Channel Up",
+    "Channel Down",
+    # Colors
     "Red",
     "Green",
     "Yellow",
     "Blue",
-    "Volume Up",
-    "Volume Down",
-    "Pause",
-    "Info",
-    "Channel Up",
-    "Channel Down",
-    "TV",
-    "Radio",
-    "Record",
-    "Recall",
+    # Digits
     "0",
     "1",
     "2",
@@ -87,36 +92,7 @@ BUTTON_KINDS: Final = ("click", "hold", "release", "double")
 # Remote modes published in the "mode" field
 REMOTE_MODES: Final = ("MUSIC", "TV", "RADIO", "HOMEMEDIA", "GAMES", "CONTROL")
 
-# Everyday BeoRemote buttons exposed as individual HA `button`
-# entities (disabled by default to avoid cluttering the device page,
-# enable per-entity from the HA UI when wiring a Lovelace card).
-# The full KNOWN_BUTTONS list is 41 entries — exposing them all would
-# swamp the device page. This subset is the one users actually stick
-# on dashboards: transport, volume, power, navigation.
-COMMON_REMOTE_BUTTONS: Final = (
-    "Play",
-    "Pause",
-    "Stop",
-    "Next",
-    "Previous",
-    "Volume Up",
-    "Volume Down",
-    "Mute",
-    "Power",
-    "Home",
-    "Back",
-    "Menu",
-    "Info",
-    "Channel Up",
-    "Channel Down",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-)
+# All BeoRemote buttons exposed as individual HA `button` entities.
+# Disabled by default — enable the ones you want from the HA device
+# page and drag them onto a Lovelace card. Mirrors KNOWN_BUTTONS exactly.
+COMMON_REMOTE_BUTTONS: Final = KNOWN_BUTTONS

@@ -141,10 +141,33 @@ bridge itself can execute.
 | `reboot` | — | `ESP.restart()` after `result` is sent. Discovery rescans automatically on the way back up. |
 | `reset_pairing` | — | Clear all BLE bonds + NVS pairing state + crash-loop boot counter, then reboot. The next boot comes up unpaired so any BeoRemote can pair fresh. |
 | `ble_disconnect` | — | Force the remote to drop and reconnect with a fresh GATT session. **Does not** clear bonds. |
-| `send_remote_key` | `key` (required, string) | Publish a synthetic `button_press` on the internal event bus with the given BeoRemote key name. Reuses the full mode-aware remote-dispatch pipeline — the bridge routes it to Sonos/TV/HA exactly as if the physical remote had been pressed. |
+| `send_remote_key` | `key` (required, string) | Publish a synthetic `button_press` on the internal event bus with the given BeoRemote key name. Reuses the full mode-aware remote-dispatch pipeline — the bridge routes it to Sonos/TV/HA exactly as if the physical remote had been pressed. Valid key names are listed in the table below. |
 | `tv_send_key` | `key` (required, string) | Send a key directly to the configured TV (LG WebOS via SSAP / Samsung Tizen via REST), bypassing the event bus entirely. Works in any remote mode — unlike `send_remote_key`, this does not require the remote to be in TV mode. Key names follow platform conventions (`KEY_VOLUP`, `KEY_MUTE`, `KEY_HOME`, …). |
 | `tv_launch_app` | `name` (required, string) | Launch a TV app by its user-visible name as configured in the bridge's TV source table (e.g. `"Netflix"`, `"Disney+"`, `"Spotify"`). Match is case-insensitive. Returns `ok:false, error:"app not found"` if the name doesn't match any configured source. |
 | `get_state` | — | Server replies with a fresh `state` frame, then `{"t":"result","id":<id>,"ok":true}`. |
+
+#### `send_remote_key` — valid key names
+
+The `key` field must be exactly one of the following strings (case-sensitive).
+Unknown names produce `result.ok=false, error:"unknown key"`.
+
+| Group | Key names |
+|---|---|
+| Playback | `Play`, `Pause`, `Next`, `Fast Forward`, `Rewind` |
+| Volume | `Volume Up`, `Volume Down`, `Mute` |
+| Power | `Power` |
+| Navigation | `Up`, `Down`, `Left`, `Right`, `Go`, `Menu`, `Back`, `Home` |
+| Info / Guide | `Info`, `Guide` |
+| Source / Mode | `Music`, `TV`, `List` |
+| Channel | `Channel Up`, `Channel Down` |
+| Colors | `Red`, `Green`, `Yellow`, `Blue` |
+| Digits | `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9` |
+
+Notes:
+- `Go` is the confirm / select button (center of the nav ring). It was called `Select` in firmware < 0.13.0.
+- `Music` and `TV` switch the remote's operating mode and route the next key presses accordingly — they do not directly control a Sonos or TV device on their own.
+- `Play` toggles play/pause on the current Sonos source when the remote is in Music mode.
+- Scene / MyButton positions (`top_left`, `top_right`, …) are **not** injectable via `send_remote_key` — they fire as `EVT_SCENE_BUTTON` (a different bus event type) and require a separate command not yet in v2.
 
 ### Deliberately not in v2
 
