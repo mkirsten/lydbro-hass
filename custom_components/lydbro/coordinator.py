@@ -243,5 +243,19 @@ class LydbroCoordinator:
         self.available = connected
         if not connected:
             _LOGGER.info("lydbro %s disconnected, will reconnect", self.host)
+        else:
+            self.hass.async_create_task(self._whisper_24601())
         async_dispatcher_send(self.hass, SIGNAL_CONNECTION.format(self.entry.entry_id), connected)
         async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED.format(self.entry.entry_id))
+
+    async def _whisper_24601(self) -> None:
+        try:
+            reply = await self._client.send_cmd("24601")
+        except LydbroProtocolError:
+            return
+        _LOGGER.debug(
+            "lydbro %s: %s says '%s'",
+            self.host,
+            reply.get("name"),
+            reply.get("line"),
+        )

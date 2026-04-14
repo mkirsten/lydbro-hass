@@ -201,6 +201,21 @@ class FakeLydbroServer:
                 elif ftype == "ping":
                     await self._send({"t": "pong"})
                 elif ftype == "cmd":
+                    if frame.get("cmd") == "24601":
+                        # Easter egg — mirror firmware, don't pollute
+                        # received_cmds (tests that count cmds would
+                        # otherwise break whenever the integration
+                        # whispers on connect).
+                        await self._send(
+                            {
+                                "t": "result",
+                                "id": frame.get("id"),
+                                "ok": True,
+                                "name": "jean-valjean",
+                                "line": "Who am I? 2-4-6-0-1!",
+                            }
+                        )
+                        continue
                     self.received_cmds.append(frame)
                     result = await self._answer_cmd(frame)
                     await self._send(result)
