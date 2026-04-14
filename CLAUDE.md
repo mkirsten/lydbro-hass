@@ -16,6 +16,17 @@ This integration is hard-gated on the Native TCP wire version. `PROTOCOL_VERSION
 
 **Every HA integration release** that touches `client.py`, `coordinator.py`, or frame-shape assumptions should also update the HA row in both compat tables — even if `v` didn't bump — so the "known-tested-together" pair advances with reality. Otherwise the tables rot.
 
+## Deploying to HA
+
+Before every deploy, bump the patch version in `custom_components/lydbro/manifest.json` by 0.0.1 (e.g. `0.2.1` → `0.2.2`). Then run the deploy script:
+
+```bash
+cd ~/Development/lydbro-hass
+HA_SSH=<user>@<HA-IP> HA_TOKEN=<token> ./deploy.sh
+```
+
+The token is in `~/Development/private-ha-config/CLAUDE.md` as `HA_TOKEN=...`. The `homeassistant.local` hostname does not resolve — always use the IP directly via `HA_SSH=<user>@<HA-IP>`.
+
 ## After editing `client.py` or `coordinator.py`
 
 Run the test suite before committing — the tests under `tests/` mock the firmware's wire protocol, so they catch frame-shape drift that HA itself wouldn't:
