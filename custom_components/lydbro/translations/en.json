@@ -94,7 +94,7 @@
       "remote_key_down": { "name": "Down" },
       "remote_key_left": { "name": "Left" },
       "remote_key_right": { "name": "Right" },
-      "remote_key_go": { "name": "Go" },
+      "remote_key_select": { "name": "Select" },
       "remote_key_menu": { "name": "Menu" },
       "remote_key_back": { "name": "Back" },
       "remote_key_home": { "name": "Home" },

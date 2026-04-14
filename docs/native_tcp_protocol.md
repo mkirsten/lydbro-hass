@@ -156,7 +156,7 @@ Unknown names produce `result.ok=false, error:"unknown key"`.
 | Playback | `Play`, `Pause`, `Next`, `Fast Forward`, `Rewind` |
 | Volume | `Volume Up`, `Volume Down`, `Mute` |
 | Power | `Power` |
-| Navigation | `Up`, `Down`, `Left`, `Right`, `Go`, `Menu`, `Back`, `Home` |
+| Navigation | `Up`, `Down`, `Left`, `Right`, `Select`, `Menu`, `Back`, `Home` |
 | Info / Guide | `Info`, `Guide` |
 | Source / Mode | `Music`, `TV`, `List` |
 | Channel | `Channel Up`, `Channel Down` |
@@ -164,7 +164,7 @@ Unknown names produce `result.ok=false, error:"unknown key"`.
 | Digits | `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9` |
 
 Notes:
-- `Go` is the confirm / select button (center of the nav ring). It was called `Select` in firmware < 0.13.0.
+- `Select` is the confirm button (center of the nav ring).
 - `Music` and `TV` switch the remote's operating mode and route the next key presses accordingly — they do not directly control a Sonos or TV device on their own.
 - `Play` toggles play/pause on the current Sonos source when the remote is in Music mode.
 - Scene / MyButton positions (`top_left`, `top_right`, …) are **not** injectable via `send_remote_key` — they fire as `EVT_SCENE_BUTTON` (a different bus event type) and require a separate command not yet in v2.

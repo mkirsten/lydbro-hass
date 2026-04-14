@@ -54,7 +54,7 @@ KNOWN_BUTTONS: Final = (
     "Down",
     "Left",
     "Right",
-    "Go",
+    "Select",
     "Menu",
     "Back",
     "Home",
