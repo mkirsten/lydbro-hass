@@ -162,6 +162,9 @@ class LydbroCoordinator:
             frame.get("branch"),
             frame.get("id"),
         )
+        name = frame.get("name")
+        if isinstance(name, str) and name and name != self.entry.title:
+            self.hass.config_entries.async_update_entry(self.entry, title=name)
 
     async def _handle_state(self, frame: dict[str, Any]) -> None:
         snapshot = {k: v for k, v in frame.items() if k != "t"}
