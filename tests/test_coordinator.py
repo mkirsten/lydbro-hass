@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import asyncio
 
+import pytest
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import Event, HomeAssistant, callback
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -304,6 +305,43 @@ async def test_battery_garbage_string_becomes_none(
 
     await fake_server.push_event("state_change", name="battery", value="not-a-number")
     await _wait_for(lambda: coordinator.state.get("battery") is None)
+
+
+# ---------------------------------------------------------------------------
+# Easter egg: 24601 whisper
+# ---------------------------------------------------------------------------
+
+
+async def test_whisper_24601_logs_jean_valjean_reply(
+    hass: HomeAssistant, fake_server: FakeLydbroServer, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Happy path: coordinator logs the jean-valjean reply at DEBUG on connect."""
+    import logging
+
+    with caplog.at_level(logging.DEBUG, logger="custom_components.lydbro.coordinator"):
+        _, _ = await _setup(hass, fake_server)
+        await asyncio.sleep(0.1)
+
+    assert any("jean-valjean" in r.message for r in caplog.records)
+
+
+async def test_whisper_24601_unknown_cmd_is_silently_swallowed(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Error path: if the bridge returns an error for 24601 (pre-flash firmware),
+    the coordinator swallows it and stays connected."""
+
+    async def _reject_24601(frame: dict) -> dict:
+        if frame.get("cmd") == "24601":
+            return {"t": "result", "id": frame.get("id"), "ok": False, "error": "unknown cmd"}
+        return {"t": "result", "id": frame.get("id"), "ok": True}
+
+    fake_server.cmd_handler = _reject_24601
+    _, coordinator = await _setup(hass, fake_server)
+    await asyncio.sleep(0.1)
+
+    # Integration must still be available despite the rejected whisper.
+    assert coordinator.available
 
 
 def test_coerce_numeric_passthrough_for_unexpected_types() -> None:

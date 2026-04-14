@@ -33,7 +33,7 @@ Run the test suite before committing — the tests under `tests/` mock the firmw
 
 ```bash
 cd ~/Development/lydbro-hass
-python -m pytest tests/ -x
+source .venv/bin/activate && python -m pytest tests/ -x --cov=custom_components/lydbro --cov-report=term-missing --cov-fail-under=100
 ```
 
 End-to-end verification against a real bridge happens on the firmware side via `products/lydbro-one-esp32/test_device.sh` in `lydbro-code` — that script's headless-browser step only validates the bridge's own web UI, not this integration, so a manual HA reload + "entities appear, button press fires trigger" check is the real smoke test for changes here.

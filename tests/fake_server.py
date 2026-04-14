@@ -201,11 +201,10 @@ class FakeLydbroServer:
                 elif ftype == "ping":
                     await self._send({"t": "pong"})
                 elif ftype == "cmd":
-                    if frame.get("cmd") == "24601":
-                        # Easter egg — mirror firmware, don't pollute
-                        # received_cmds (tests that count cmds would
-                        # otherwise break whenever the integration
-                        # whispers on connect).
+                    if frame.get("cmd") == "24601" and self.cmd_handler is None:
+                        # Easter egg — mirror firmware behaviour when no
+                        # custom handler is installed. Don't pollute
+                        # received_cmds so tests that count cmds stay clean.
                         await self._send(
                             {
                                 "t": "result",
