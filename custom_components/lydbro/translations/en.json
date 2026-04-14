@@ -92,7 +92,20 @@
       "remote_key_power": { "name": "Power" },
       "remote_key_home": { "name": "Home" },
       "remote_key_back": { "name": "Back" },
-      "remote_key_menu": { "name": "Menu" }
+      "remote_key_menu": { "name": "Menu" },
+      "remote_key_info": { "name": "Info" },
+      "remote_key_channel_up": { "name": "Channel up" },
+      "remote_key_channel_down": { "name": "Channel down" },
+      "remote_key_0": { "name": "0" },
+      "remote_key_1": { "name": "1" },
+      "remote_key_2": { "name": "2" },
+      "remote_key_3": { "name": "3" },
+      "remote_key_4": { "name": "4" },
+      "remote_key_5": { "name": "5" },
+      "remote_key_6": { "name": "6" },
+      "remote_key_7": { "name": "7" },
+      "remote_key_8": { "name": "8" },
+      "remote_key_9": { "name": "9" }
     },
     "event": {
       "button": { "name": "Button" },

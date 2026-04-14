@@ -142,15 +142,15 @@ bridge itself can execute.
 | `reset_pairing` | — | Clear all BLE bonds + NVS pairing state + crash-loop boot counter, then reboot. The next boot comes up unpaired so any BeoRemote can pair fresh. |
 | `ble_disconnect` | — | Force the remote to drop and reconnect with a fresh GATT session. **Does not** clear bonds. |
 | `send_remote_key` | `key` (required, string) | Publish a synthetic `button_press` on the internal event bus with the given BeoRemote key name. Reuses the full mode-aware remote-dispatch pipeline — the bridge routes it to Sonos/TV/HA exactly as if the physical remote had been pressed. |
+| `tv_send_key` | `key` (required, string) | Send a key directly to the configured TV (LG WebOS via SSAP / Samsung Tizen via REST), bypassing the event bus entirely. Works in any remote mode — unlike `send_remote_key`, this does not require the remote to be in TV mode. Key names follow platform conventions (`KEY_VOLUP`, `KEY_MUTE`, `KEY_HOME`, …). |
+| `tv_launch_app` | `name` (required, string) | Launch a TV app by its user-visible name as configured in the bridge's TV source table (e.g. `"Netflix"`, `"Disney+"`, `"Spotify"`). Match is case-insensitive. Returns `ok:false, error:"app not found"` if the name doesn't match any configured source. |
 | `get_state` | — | Server replies with a fresh `state` frame, then `{"t":"result","id":<id>,"ok":true}`. |
 
 ### Deliberately not in v2
 
-- **No `sonos_*` / `tv_*` commands.** HA controls those targets
-  directly through `media_player.*` / `webostv` / Samsung TV
-  integrations. Routing through the bridge was a detour with no
-  upside. The bridge's remote-press → Sonos/TV dispatch path still
-  lives on the device, it just isn't reachable from the wire.
+- **No `sonos_*` commands.** HA controls Sonos directly through
+  `media_player.*`. Routing through the bridge adds a hop with no
+  upside.
 - **No `rescan_discovery`.** Discovery runs on every boot, so a
   `reboot` gets you a fresh device list for free.
 - **No `config_set` / `config_get`.** Configuration still lives on

@@ -14,3 +14,37 @@ send_remote_key:
       example: "Play"
       selector:
         text:
+
+tv_send_key:
+  name: Send TV key
+  description: Send a key directly to the configured TV, bypassing the BeoRemote event bus. Works in any remote mode — no need to switch the remote to TV mode first.
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    key:
+      name: Key
+      required: true
+      example: "KEY_VOLUP"
+      selector:
+        text:
+
+tv_launch_app:
+  name: Launch TV app
+  description: Launch an app on the configured TV by its user-visible name as set up in the bridge's TV source table (e.g. "Netflix", "Disney+").
+  fields:
+    device_id:
+      name: Device
+      required: true
+      selector:
+        device:
+          integration: lydbro
+    app:
+      name: App
+      required: true
+      example: "Netflix"
+      selector:
+        text:

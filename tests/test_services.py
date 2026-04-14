@@ -235,3 +235,39 @@ async def test_services_only_registered_once_across_multiple_entries(
 
     # Still exactly the one registration, no duplicate handlers.
     assert hass.services.has_service(DOMAIN, "send_remote_key")
+
+
+async def test_tv_send_key_forwards_cmd(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
+    """tv_send_key sends the key directly to the TV via the bridge."""
+    _, device_id = await _setup(hass, fake_server)
+
+    await hass.services.async_call(
+        DOMAIN,
+        "tv_send_key",
+        {ATTR_DEVICE_ID: device_id, "key": "KEY_VOLUP"},
+        blocking=True,
+    )
+
+    cmds = fake_server.received_cmds
+    assert len(cmds) == 1
+    assert cmds[0]["cmd"] == "tv_send_key"
+    assert cmds[0]["key"] == "KEY_VOLUP"
+
+
+async def test_tv_launch_app_forwards_cmd_with_name_field(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """tv_launch_app sends the app name as the 'name' wire field."""
+    _, device_id = await _setup(hass, fake_server)
+
+    await hass.services.async_call(
+        DOMAIN,
+        "tv_launch_app",
+        {ATTR_DEVICE_ID: device_id, "app": "Netflix"},
+        blocking=True,
+    )
+
+    cmds = fake_server.received_cmds
+    assert len(cmds) == 1
+    assert cmds[0]["cmd"] == "tv_launch_app"
+    assert cmds[0]["name"] == "Netflix"
