@@ -56,3 +56,15 @@ repos:
         types: [python]
         files: ^custom_components/lydbro/
         pass_filenames: false
+
+      - id: pytest-coverage
+        name: pytest (100% coverage)
+        entry: .venv/bin/python -m pytest tests/
+          --cov=custom_components/lydbro
+          --cov-report=term-missing
+          --cov-fail-under=100
+          -q
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
