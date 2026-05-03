@@ -48,6 +48,7 @@ class LydbroSensorDescription(SensorEntityDescription):
 
     value_fn: Callable[[dict[str, Any]], Any]
     attributes_fn: Callable[[dict[str, Any]], dict[str, Any]] | None = None
+    available_fn: Callable[[dict[str, Any]], bool] | None = None
 
 
 SENSORS: tuple[LydbroSensorDescription, ...] = (
@@ -57,6 +58,7 @@ SENSORS: tuple[LydbroSensorDescription, ...] = (
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
+        available_fn=lambda s: bool(s.get("ble_connected")),
         value_fn=lambda s: s.get("battery") if s.get("battery", -1) >= 0 else None,
     ),
     LydbroSensorDescription(
@@ -129,6 +131,12 @@ class LydbroSensor(LydbroEntity, SensorEntity):
         super().__init__(coordinator)
         self.entity_description = description
         self._attr_unique_id = f"{coordinator.device_id}_{description.key}"
+
+    @property
+    def available(self) -> bool:
+        if self.entity_description.available_fn is not None:
+            return super().available and self.entity_description.available_fn(self.coordinator.state)
+        return super().available
 
     @property
     def native_value(self) -> Any:

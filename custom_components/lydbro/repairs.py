@@ -105,7 +105,7 @@ class LydbroIssueMonitor:
     def _check_low_battery(self, state: dict[str, Any]) -> None:
         issue_id = _issue_id("low_battery", self._coordinator.device_id)
         battery = state.get("battery")
-        if not isinstance(battery, int | float):
+        if not isinstance(battery, int | float) or battery < 0:
             return
         # Hysteresis: the issue can only become active below the
         # lower threshold, and can only clear above the higher one.
