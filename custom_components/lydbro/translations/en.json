@@ -47,10 +47,6 @@
     "low_battery": {
       "title": "BeoRemote One battery low",
       "description": "The BeoRemote One paired with this Lydbro bridge is at **{battery}%**. Charge or replace the batteries. This notification will clear automatically once the battery recovers."
-    },
-    "ble_disconnected": {
-      "title": "BeoRemote One out of range",
-      "description": "The BeoRemote One has been disconnected from the Lydbro bridge for more than {minutes} minutes. Short drops when the remote sleeps are normal; sustained drops usually mean the remote is out of range, the batteries are flat, or the bridge has lost BLE. This notification will clear automatically when the link comes back."
     }
   },
   "entity": {

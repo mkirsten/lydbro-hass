@@ -1,6 +1,6 @@
 """Repair-issue monitor for Lydbro.
 
-Surfaces three classes of problem to the HA Repairs dashboard so
+Surfaces two classes of problem to the HA Repairs dashboard so
 users see them without having to trawl through logs:
 
 * **safe_mode** — the bridge entered safe mode (crash loop). Severity
@@ -10,19 +10,13 @@ users see them without having to trawl through logs:
   hysteresis (must recover past :data:`LOW_BATTERY_CLEAR`) so a
   remote bouncing around the threshold doesn't flap the issue on
   and off.
-* **ble_disconnected** — the BLE link to the BeoRemote One has been
-  down for more than :data:`BLE_DOWN_GRACE_SECONDS`. Severity
-  ``warning``. A short drop is normal (the remote sleeps) so we
-  deliberately wait before raising.
 
 :class:`LydbroIssueMonitor` is owned by :class:`LydbroCoordinator`
-and evaluated on every state update, plus on a timer for the BLE
-grace period.
+and evaluated on every state update.
 """
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.core import HomeAssistant
@@ -38,7 +32,6 @@ if TYPE_CHECKING:
 # them without reaching into a class.
 LOW_BATTERY_THRESHOLD = 10  # %  — raise at or below this
 LOW_BATTERY_CLEAR = 15  # %  — clear once we recover past this
-BLE_DOWN_GRACE_SECONDS = 300  # 5 min — ignore short wake-ups
 
 
 def _issue_id(kind: str, device_id: str) -> str:
@@ -53,16 +46,15 @@ class LydbroIssueMonitor:
         self._hass = hass
         self._coordinator = coordinator
 
-        # Hysteresis + grace-period bookkeeping.
+        # Hysteresis bookkeeping.
         self._low_battery_active = False
-        self._ble_down_task: asyncio.Task[None] | None = None
 
     # ------------------------------------------------------------------
     # Public entry points
     # ------------------------------------------------------------------
 
     def evaluate(self) -> None:
-        """Evaluate all three issue classes against the current state.
+        """Evaluate the issue classes against the current state.
 
         Safe to call from the event loop on every state update — all
         interactions with the issue registry are idempotent, so
@@ -71,13 +63,18 @@ class LydbroIssueMonitor:
         state = self._coordinator.state
         self._check_safe_mode(state)
         self._check_low_battery(state)
-        self._check_ble_link(state)
+        # Clear any lingering issue from older versions that raised a
+        # repair when the BLE link stayed down. The BeoRemote One
+        # normally disconnects when idle so that notification was noise.
+        ir.async_delete_issue(
+            self._hass,
+            DOMAIN,
+            _issue_id("ble_disconnected", self._coordinator.device_id),
+        )
 
     def shutdown(self) -> None:
-        """Cancel the pending BLE-down grace-period task on unload."""
-        if self._ble_down_task is not None:
-            self._ble_down_task.cancel()
-            self._ble_down_task = None
+        """Hook for unload-time cleanup. Currently nothing to cancel."""
+        return
 
     # ------------------------------------------------------------------
     # Individual checks
@@ -124,42 +121,3 @@ class LydbroIssueMonitor:
         elif battery >= LOW_BATTERY_CLEAR and self._low_battery_active:
             self._low_battery_active = False
             ir.async_delete_issue(self._hass, DOMAIN, issue_id)
-
-    def _check_ble_link(self, state: dict[str, Any]) -> None:
-        issue_id = _issue_id("ble_disconnected", self._coordinator.device_id)
-        connected = bool(state.get("ble_connected"))
-
-        if connected:
-            # Cancel any pending grace-period timer and clear the issue.
-            if self._ble_down_task is not None:
-                self._ble_down_task.cancel()
-                self._ble_down_task = None
-            ir.async_delete_issue(self._hass, DOMAIN, issue_id)
-            return
-
-        # Disconnected. If we're not already waiting, start the
-        # grace-period timer that will raise the issue if the link
-        # stays down for BLE_DOWN_GRACE_SECONDS.
-        if self._ble_down_task is None or self._ble_down_task.done():
-            self._ble_down_task = self._hass.async_create_task(self._ble_grace_period(issue_id))
-
-    async def _ble_grace_period(self, issue_id: str) -> None:
-        try:
-            await asyncio.sleep(BLE_DOWN_GRACE_SECONDS)
-        except asyncio.CancelledError:
-            return
-        # Still disconnected after the grace period? Raise.
-        if not self._coordinator.state.get("ble_connected"):
-            # Round up so the UI never says "0 minutes" — in prod
-            # BLE_DOWN_GRACE_SECONDS is 300 (5 min); tests shrink it
-            # to <60 which would otherwise integer-divide to 0.
-            minutes = max(1, round(BLE_DOWN_GRACE_SECONDS / 60))
-            ir.async_create_issue(
-                self._hass,
-                DOMAIN,
-                issue_id,
-                is_fixable=False,
-                severity=ir.IssueSeverity.WARNING,
-                translation_key="ble_disconnected",
-                translation_placeholders={"minutes": str(minutes)},
-            )

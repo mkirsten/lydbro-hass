@@ -201,10 +201,9 @@
                   Mute: KEY_MUTE
                   Play: KEY_PLAY
                   Pause: KEY_PAUSE
-                  Play/Pause: KEY_PAUSE
                   Next: KEY_FF
-                  Previous: KEY_REWIND
-                  Stop: KEY_STOP
+                  Fast Forward: KEY_FF
+                  Rewind: KEY_REWIND
                   Channel Up: KEY_CHUP
                   Channel Down: KEY_CHDOWN
                   Up: KEY_UP

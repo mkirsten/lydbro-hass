@@ -82,7 +82,7 @@ don't need dashboard wiring:
 | `sensor` | Last button press | Timestamp (`device_class: timestamp`) of the most recent BeoRemote press, with `name` / `kind` / `mode` as attributes. Perfect for a "last activity" card. |
 | `sensor` | Current mode | Enum (`music` / `tv` / `radio` / `homemedia` / `games` / `control`). Tracks whichever mode the remote was last observed in. Good for dashboard conditionals — show different cards based on what the user is doing. |
 | `sensor` | IP address | Diagnostic — the bridge's LAN address, for when you need to open its web UI from an automation. |
-| `button` | Play / Pause / Stop / Next / Previous / Volume Up / Volume Down / Mute / Power / Home / Back / Menu | 12 virtual remote-key buttons — one per common BeoRemote button. Pressing each fires `send_remote_key` with the matching key, so you can drag e.g. **Play** onto a Lovelace card without scripting. |
+| `button` | Play / Pause / Next / Fast Forward / Rewind / Volume Up / Volume Down / Mute / Power / Up / Down / Left / Right / Select / Menu / Back / Home / Info / Guide / Music / TV / List / Channel Up / Channel Down / Red / Green / Yellow / Blue / 0–9 | One virtual remote-key button per canonical BeoRemote One event. Pressing each fires `send_remote_key` with the matching key, so you can drag e.g. **Play** onto a Lovelace card without scripting. |
 
 ### Device triggers
 
@@ -138,7 +138,7 @@ new connection.
 
 What people actually build with this:
 
-- **BeoRemote One → Sonos**. Play / Pause / Next / Previous / Vol
+- **BeoRemote One → Sonos**. Play / Pause / Next / Rewind / Vol
   Up / Vol Down mapped to the currently-selected Sonos zone. The
   bundled [`blueprints/beoremote_media_player.yaml`](blueprints/beoremote_media_player.yaml)
   wires this up in one click.
@@ -354,9 +354,6 @@ dashboards or automations needed:
   is at or below 10%. Hysteresis: the notification clears once the
   battery recovers past 15%, so a remote bouncing around the
   threshold doesn't flap the notification on and off.
-- **BeoRemote out of range** (severity `warning`) — the BLE link
-  has been down for more than 5 minutes. Short drops when the
-  remote sleeps are normal and don't fire this.
 
 ---
 

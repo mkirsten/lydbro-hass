@@ -29,6 +29,9 @@
     "abort": {
       "already_configured": "This Lydbro One device is already configured.",
       "reconfigure_successful": "Lydbro One address updated."
+    },
+    "create_entry": {
+      "default": "**{name}** is connected.\n\nEntities and events are ready — use them in automations and dashboards as usual.\n\nFor everything that lives on the bridge itself (pairing, scene buttons, TV/music sources, command routing, firmware, logs), open the device's web UI via the **Visit** button on the device page."
     }
   },
   "exceptions": {
@@ -47,10 +50,6 @@
     "low_battery": {
       "title": "BeoRemote One battery low",
       "description": "The BeoRemote One paired with this Lydbro bridge is at **{battery}%**. Charge or replace the batteries. This notification will clear automatically once the battery recovers."
-    },
-    "ble_disconnected": {
-      "title": "BeoRemote One out of range",
-      "description": "The BeoRemote One has been disconnected from the Lydbro bridge for more than {minutes} minutes. Short drops when the remote sleeps are normal; sustained drops usually mean the remote is out of range, the batteries are flat, or the bridge has lost BLE. This notification will clear automatically when the link comes back."
     }
   },
   "entity": {
@@ -83,16 +82,42 @@
       "ble_disconnect": { "name": "Disconnect BeoRemote" },
       "remote_key_play": { "name": "Play" },
       "remote_key_pause": { "name": "Pause" },
-      "remote_key_stop": { "name": "Stop" },
       "remote_key_next": { "name": "Next" },
-      "remote_key_previous": { "name": "Previous" },
+      "remote_key_fast_forward": { "name": "Fast forward" },
+      "remote_key_rewind": { "name": "Rewind" },
       "remote_key_volume_up": { "name": "Volume up" },
       "remote_key_volume_down": { "name": "Volume down" },
       "remote_key_mute": { "name": "Mute" },
       "remote_key_power": { "name": "Power" },
-      "remote_key_home": { "name": "Home" },
+      "remote_key_up": { "name": "Up" },
+      "remote_key_down": { "name": "Down" },
+      "remote_key_left": { "name": "Left" },
+      "remote_key_right": { "name": "Right" },
+      "remote_key_select": { "name": "Select" },
+      "remote_key_menu": { "name": "Menu" },
       "remote_key_back": { "name": "Back" },
-      "remote_key_menu": { "name": "Menu" }
+      "remote_key_home": { "name": "Home" },
+      "remote_key_info": { "name": "Info" },
+      "remote_key_guide": { "name": "Guide" },
+      "remote_key_music": { "name": "Music" },
+      "remote_key_tv": { "name": "TV" },
+      "remote_key_list": { "name": "List" },
+      "remote_key_channel_up": { "name": "Channel up" },
+      "remote_key_channel_down": { "name": "Channel down" },
+      "remote_key_red": { "name": "Red" },
+      "remote_key_green": { "name": "Green" },
+      "remote_key_yellow": { "name": "Yellow" },
+      "remote_key_blue": { "name": "Blue" },
+      "remote_key_0": { "name": "0" },
+      "remote_key_1": { "name": "1" },
+      "remote_key_2": { "name": "2" },
+      "remote_key_3": { "name": "3" },
+      "remote_key_4": { "name": "4" },
+      "remote_key_5": { "name": "5" },
+      "remote_key_6": { "name": "6" },
+      "remote_key_7": { "name": "7" },
+      "remote_key_8": { "name": "8" },
+      "remote_key_9": { "name": "9" }
     },
     "event": {
       "button": { "name": "Button" },

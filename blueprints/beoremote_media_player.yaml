@@ -54,14 +54,14 @@ action:
       name: "{{ trigger.event.data.name }}"
       kind: "{{ trigger.event.data.kind | default('click') }}"
   - choose:
-      - conditions: "{{ name == 'Play' or name == 'Play/Pause' }}"
+      - conditions: "{{ name == 'Play' }}"
         sequence:
-          - action: media_player.media_play_pause
+          - action: media_player.media_play
             target:
               entity_id: !input media_player
-      - conditions: "{{ name == 'Stop' }}"
+      - conditions: "{{ name == 'Pause' }}"
         sequence:
-          - action: media_player.media_stop
+          - action: media_player.media_pause
             target:
               entity_id: !input media_player
       - conditions: "{{ name == 'Next' }}"
@@ -69,7 +69,7 @@ action:
           - action: media_player.media_next_track
             target:
               entity_id: !input media_player
-      - conditions: "{{ name == 'Previous' }}"
+      - conditions: "{{ name == 'Rewind' }}"
         sequence:
           - action: media_player.media_previous_track
             target:

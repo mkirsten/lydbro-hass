@@ -1,14 +1,12 @@
 """Repair-issue monitor tests.
 
-Exercises the three issue classes end-to-end against a live
-coordinator + fake bridge:
+Exercises the issue classes end-to-end against a live coordinator +
+fake bridge:
 
 * safe_mode raises an error-severity issue when state flips to True
   and clears it when it flips back;
 * low_battery hysteresis — raise at ≤10, clear at ≥15, don't flap in
-  the middle;
-* ble_disconnected only fires after the grace period elapses; a
-  reconnect before then cancels the timer silently.
+  the middle.
 """
 
 from __future__ import annotations
@@ -20,7 +18,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.lydbro import repairs as repairs_mod
 from custom_components.lydbro.const import DOMAIN
 from custom_components.lydbro.coordinator import LydbroCoordinator
 
@@ -132,47 +129,20 @@ async def test_low_battery_non_numeric_ignored(
     assert _issue(hass, "low_battery") is None
 
 
-# ---------------------------------------------------------------------------
-# ble_disconnected grace period
-# ---------------------------------------------------------------------------
-
-
-async def test_ble_disconnected_waits_for_grace_period(
-    hass: HomeAssistant,
-    fake_server: FakeLydbroServer,
-    monkeypatch,
+async def test_legacy_ble_disconnected_issue_cleared_on_startup(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
 ) -> None:
-    """BLE down past the grace period raises a warning issue."""
-    # Shrink the grace period so the test doesn't wait 5 real minutes.
-    # Keep it long enough to be observably longer than "test setup".
-    monkeypatch.setattr(repairs_mod, "BLE_DOWN_GRACE_SECONDS", 0.5)
+    """A lingering ble_disconnected issue from an older version is cleared."""
+    # Pre-seed the registry as if the previous version had raised it.
+    ir.async_create_issue(
+        hass,
+        DOMAIN,
+        "ble_disconnected_aa:bb:cc:dd:ee:ff",
+        is_fixable=False,
+        severity=ir.IssueSeverity.WARNING,
+        translation_key="ble_disconnected",
+    )
+    assert _issue(hass, "ble_disconnected") is not None
 
-    await _setup(hass, fake_server, ble_connected=False)
-
-    # Wait past the grace period → issue raised.
-    await _wait_for(lambda: _issue(hass, "ble_disconnected") is not None, timeout=2.0)
-    issue = _issue(hass, "ble_disconnected")
-    assert issue is not None
-    assert issue.severity == ir.IssueSeverity.WARNING
-    assert issue.translation_key == "ble_disconnected"
-
-    # BLE comes back → issue cleared.
-    await fake_server.push_event("state_change", name="ble_connected", value=True)
+    await _setup(hass, fake_server)
     await _wait_for(lambda: _issue(hass, "ble_disconnected") is None)
-
-
-async def test_ble_reconnect_within_grace_cancels_timer(
-    hass: HomeAssistant,
-    fake_server: FakeLydbroServer,
-    monkeypatch,
-) -> None:
-    """A reconnect before the grace period elapses must not raise the issue."""
-    monkeypatch.setattr(repairs_mod, "BLE_DOWN_GRACE_SECONDS", 5.0)
-
-    await _setup(hass, fake_server, ble_connected=False)
-
-    # Quickly reconnect before the 5s timer can fire.
-    await fake_server.push_event("state_change", name="ble_connected", value=True)
-    await asyncio.sleep(0.1)
-
-    assert _issue(hass, "ble_disconnected") is None
