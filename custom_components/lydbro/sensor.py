@@ -59,7 +59,7 @@ SENSORS: tuple[LydbroSensorDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
         available_fn=lambda s: bool(s.get("ble_connected")),
-        value_fn=lambda s: s.get("battery") if s.get("battery", -1) >= 0 else None,
+        value_fn=lambda s: b if (b := s.get("battery")) is not None and b >= 0 else None,
     ),
     LydbroSensorDescription(
         key="boot_phase",

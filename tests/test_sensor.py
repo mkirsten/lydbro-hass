@@ -155,3 +155,26 @@ def test_parse_last_press_bad_iso_returns_none() -> None:
     assert _parse_last_press({}) is None
     assert _parse_last_press({"last_button_press": 12345}) is None
     assert _parse_last_press({"last_button_press": "2026-04-12T20:30:00+00:00"}) is not None
+
+
+# ---------------------------------------------------------------------------
+# battery value_fn
+# ---------------------------------------------------------------------------
+
+
+def test_battery_value_fn_handles_null() -> None:
+    """A null/missing battery resolves to None, not a TypeError.
+
+    The firmware sends ``battery: null`` while the remote is disconnected.
+    The key is present, so ``dict.get('battery', -1)`` returns None (not the
+    -1 default) and a naive ``None >= 0`` comparison raises. Guard for None.
+    """
+    from custom_components.lydbro.sensor import SENSORS
+
+    value_fn = next(s for s in SENSORS if s.key == "battery").value_fn
+
+    assert value_fn({"battery": None}) is None  # disconnected: present-but-null
+    assert value_fn({}) is None  # absent
+    assert value_fn({"battery": -1}) is None  # sentinel negative
+    assert value_fn({"battery": 0}) == 0  # falsy-but-valid
+    assert value_fn({"battery": 87}) == 87
