@@ -135,7 +135,9 @@ class LydbroSensor(LydbroEntity, SensorEntity):
     @property
     def available(self) -> bool:
         if self.entity_description.available_fn is not None:
-            return super().available and self.entity_description.available_fn(self.coordinator.state)
+            return super().available and self.entity_description.available_fn(
+                self.coordinator.state
+            )
         return super().available
 
     @property
