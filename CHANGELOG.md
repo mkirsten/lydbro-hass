@@ -2,6 +2,16 @@
 
 All notable changes to this integration are documented here.
 
+## [0.2.6] — 2026-07-04
+
+Discoverability release for the HACS default-store submission.
+
+- HACS display name now includes "Bang & Olufsen BeoRemote One" so
+  in-store search finds it by B&O terms.
+- HACS validation runs the brands check for real (icons ship in the
+  integration's own `brand/` directory, HA ≥ 2026.3.0 style).
+- README/HACS info page copy fixes; no code changes.
+
 ## [0.2.5] — 2026-07-04
 
 First public release (HACS custom repository).

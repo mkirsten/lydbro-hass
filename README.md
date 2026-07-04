@@ -167,9 +167,12 @@ wild.
 | **Lydbro One** | ≥ `0.11.9.3` | Fully supported (active development target) |
 
 The Lydbro One is the ESP32-based bridge with PoE Ethernet + BLE
-that pairs with a Bang & Olufsen BeoRemote One. Earlier Raspberry Pi
-/ BlueZ builds (pre-ESP32) are not supported by this integration —
-they predate the Native TCP transport. If you're on one of those,
+that pairs with a Bang & Olufsen BeoRemote One — the Bluetooth remote
+B&O ships with Beolink Multiroom, Beosound and Beovision products, and
+a popular upgrade for owners of older Beolink / Masterlink era systems
+who want their B&O remote driving the rest of the smart home. Earlier
+Raspberry Pi / BlueZ builds (pre-ESP32) are not supported by this
+integration — they predate the Native TCP transport. If you're on one of those,
 the legacy MQTT path still works and there's a migration guide
 linked below.
 
