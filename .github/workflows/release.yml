@@ -31,6 +31,6 @@ jobs:
           zip -r ../../lydbro.zip .
 
       - name: Attach zip to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: lydbro.zip
