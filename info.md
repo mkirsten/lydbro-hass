@@ -10,8 +10,8 @@ automate your BeoRemote One via a Lydbro One bridge.
   with <50ms latency
 - **Event entities** for every BeoRemote One button, mode, and scene
 - **Sensors** for battery, BLE link state, and boot phase
-- **Services** to drive Sonos, Samsung/LG TVs, and IR targets through the
-  bridge
+- **Services** to inject virtual remote key presses and drive the bridge's
+  configured TV directly (send key, launch app)
 - **No cloud, no polling, no YAML required**
 
 See the [README](https://github.com/mkirsten/lydbro-hass) for full setup
