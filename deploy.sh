@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
-# Deploy custom_components/lydbro/ to the lab HA instance and restart it.
+# Deploy custom_components/lydbro/ to a development HA instance and restart it.
 #
-# HA lives in a VM, reachable as homeassistant.local
-# with SSH user `<user>` and config at /root/config/. Token in
-# ~/.claude/CLAUDE.md (HA_TOKEN env var).
+# Assumes SSH access to the HA host with config at /root/config/,
+# and a long-lived access token for the restart API call.
+#
+# Usage: HA_SSH=<user>@<ha-host> HA_URL=http://<ha-host>:8123 HA_TOKEN=<token> ./deploy.sh
 set -euo pipefail
 
-HA_SSH="${HA_SSH:-<user>@homeassistant.local}"
-HA_URL="${HA_URL:-http://<HA-IP>:8123}"
-
-if [[ -z "${HA_TOKEN:-}" ]]; then
-  echo "HA_TOKEN not set — export it or source from ~/.claude/CLAUDE.md" >&2
+if [[ -z "${HA_SSH:-}" || -z "${HA_URL:-}" || -z "${HA_TOKEN:-}" ]]; then
+  echo "HA_SSH, HA_URL and HA_TOKEN must all be set — see usage in the header" >&2
   exit 1
 fi
 
