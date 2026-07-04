@@ -45,15 +45,13 @@ jobs:
         # don't soften the config to make a red build green.
         run: python -m mypy
 
-  # HACS validation is intentionally disabled while this repo is
-  # private — the hacs/action image can't resolve private repos
-  # reliably, and we're not ready to publish to the HACS index yet.
-  # When the repo goes public AND we want a HACS listing, uncomment:
-  #
-  # hacs:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: hacs/action@main
-  #       with:
-  #         category: integration
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hacs/action@main
+        with:
+          category: integration
+          # Not (yet) in the HACS default store — installed as a custom
+          # repository, so skip the brands check until we submit there.
+          ignore: brands
