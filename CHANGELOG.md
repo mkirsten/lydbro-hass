@@ -2,6 +2,20 @@
 
 All notable changes to this integration are documented here.
 
+## [0.2.5] — 2026-07-04
+
+First public release (HACS custom repository).
+
+- Canonical BeoRemote One button-name cleanup across triggers,
+  events, and services (`Select` confirmed as the wire name).
+- New `tv_send_key` and `tv_launch_app` services; full BeoRemote
+  button set exposed.
+- Battery sensor hardened: no longer unavailable when the remote
+  is disconnected, and null battery values no longer crash the
+  sensor.
+- Dropped the BLE-out-of-range repair issue (noise — BLE link
+  binary sensor covers it).
+
 ## [0.2.0] — Unreleased
 
 **Breaking**: wire protocol bumped to v2. Requires Lydbro One
