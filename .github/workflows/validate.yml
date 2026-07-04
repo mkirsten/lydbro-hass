@@ -52,6 +52,3 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
-          # Not (yet) in the HACS default store — installed as a custom
-          # repository, so skip the brands check until we submit there.
-          ignore: brands
