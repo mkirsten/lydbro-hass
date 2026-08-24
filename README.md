@@ -199,21 +199,33 @@ go when something is off.
 
 ## Installation
 
-### Via HACS (recommended)
+### HACS (recommended)
 
-1. In HACS → **Integrations** → ⋮ → **Custom repositories**
-2. Add `https://github.com/mkirsten/lydbro-hass` as category **Integration**
-3. Install **Lydbro**
-4. Restart Home Assistant
-5. Your Lydbro One should pop up under **Settings → Devices & Services →
-   Discovered**. If it doesn't, add it manually via **+ Add Integration →
-   Lydbro** and enter its IP.
+[![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=mkirsten&repository=lydbro-hass&category=integration)
 
-### Manually
+1. Make sure [HACS is installed](https://hacs.xyz/docs/use/download/download/).
+2. Click the badge above — or, in HACS, open **⋮ → Custom repositories** and
+   add `https://github.com/mkirsten/lydbro-hass` with type **Integration**.
+3. Search for **Lydbro** in HACS and click **Download**.
+4. Restart Home Assistant.
+5. Your Lydbro One is discovered automatically and appears under
+   **Settings → Devices & Services → Discovered**. If it doesn't, click the
+   badge below (or **+ Add Integration → Lydbro**) and enter the bridge's IP.
 
-1. Copy `custom_components/lydbro/` into your HA `config/custom_components/`
-2. Restart Home Assistant
-3. Add the integration from **Settings → Devices & Services**
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=lydbro)
+
+### Manual installation
+
+1. Download the source archive of the
+   [latest release](https://github.com/mkirsten/lydbro-hass/releases/latest).
+2. Copy the `custom_components/lydbro/` folder into the
+   `custom_components` directory of your Home Assistant configuration
+   directory (next to `configuration.yaml`; create `custom_components`
+   if it doesn't exist), so you end up with
+   `config/custom_components/lydbro/`.
+3. Restart Home Assistant.
+4. Add the integration from **Settings → Devices & Services →
+   + Add Integration → Lydbro**.
 
 ### Changing the bridge's address
 
