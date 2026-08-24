@@ -5,7 +5,7 @@
 <h1 align="center">Lydbro for Home Assistant</h1>
 
 <p align="center">
-  <a href="https://github.com/hacs/integration"><img alt="HACS" src="https://img.shields.io/badge/HACS-Custom-41BDF5.svg"></a>
+  <a href="https://github.com/hacs/integration"><img alt="HACS" src="https://img.shields.io/badge/HACS-Default-41BDF5.svg"></a>
   <a href="https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml"><img alt="Validate" src="https://github.com/mkirsten/lydbro-hass/actions/workflows/validate.yml/badge.svg"></a>
   <a href="https://github.com/mkirsten/lydbro-hass/releases"><img alt="Release" src="https://img.shields.io/github/v/release/mkirsten/lydbro-hass?include_prereleases"></a>
   <a href="https://developers.home-assistant.io/docs/core/integration-quality-scale"><img alt="Quality Scale" src="https://img.shields.io/badge/quality_scale-platinum-5c7cfa.svg"></a>
@@ -204,11 +204,10 @@ go when something is off.
 [![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=mkirsten&repository=lydbro-hass&category=integration)
 
 1. Make sure [HACS is installed](https://hacs.xyz/docs/use/download/download/).
-2. Click the badge above — or, in HACS, open **⋮ → Custom repositories** and
-   add `https://github.com/mkirsten/lydbro-hass` with type **Integration**.
-3. Search for **Lydbro** in HACS and click **Download**.
-4. Restart Home Assistant.
-5. Your Lydbro One is discovered automatically and appears under
+2. Click the badge above — or search for **Lydbro** in HACS — and click
+   **Download**.
+3. Restart Home Assistant.
+4. Your Lydbro One is discovered automatically and appears under
    **Settings → Devices & Services → Discovered**. If it doesn't, click the
    badge below (or **+ Add Integration → Lydbro**) and enter the bridge's IP.
 
