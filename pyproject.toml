@@ -1,6 +1,6 @@
 [project]
 name = "lydbro-hass"
-version = "1.0.0"
+version = "1.0.1"
 description = "Home Assistant custom integration for the Lydbro One Beoremote bridge"
 requires-python = ">=3.13"
 

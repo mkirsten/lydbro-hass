@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented here.
 
+## [1.0.1] - 2026-09-12
+
+- The logo at the top of the README now shows in the HACS repository
+  page. No functional changes.
+
 ## [1.0.0] - 2026-09-12
 
 First stable release. The integration has been running against the
