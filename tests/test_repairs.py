@@ -5,7 +5,7 @@ fake bridge:
 
 * safe_mode raises an error-severity issue when state flips to True
   and clears it when it flips back;
-* low_battery hysteresis — raise at ≤10, clear at ≥15, don't flap in
+* low_battery hysteresis - raise at ≤10, clear at ≥15, don't flap in
   the middle.
 """
 

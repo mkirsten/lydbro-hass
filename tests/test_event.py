@@ -2,14 +2,14 @@
 
 Three ``event.*`` entities are created per device:
 
-  * ``event.test_lydbro_one_button`` — physical button presses
-  * ``event.test_lydbro_one_menu``   — vendor-menu selections
-  * ``event.test_lydbro_one_scene``  — four corner scene buttons
+  * ``event.test_lydbro_one_button`` - physical button presses
+  * ``event.test_lydbro_one_menu``   - vendor-menu selections
+  * ``event.test_lydbro_one_scene``  - four corner scene buttons
 
 Each subscribes to the per-entry ``SIGNAL_EVENT`` dispatcher and
 filters by ``frame.type`` so each entity only reacts to its own kind
 of frame. Unknown button names and unknown scene positions are
-silently dropped — HA's event platform doesn't reliably propagate
+silently dropped - HA's event platform doesn't reliably propagate
 dynamic additions to ``event_types``, so firmware-side changes need
 a matching update in ``const.KNOWN_BUTTONS``.
 """
@@ -102,7 +102,7 @@ async def test_button_event_unknown_name_dropped(
 
     state = hass.states.get(BUTTON_ENTITY_ID)
     assert state is not None
-    # No event fired — the entity state hasn't advanced past its
+    # No event fired - the entity state hasn't advanced past its
     # initial "no event yet" placeholder.
     assert state.state == initial_state
 

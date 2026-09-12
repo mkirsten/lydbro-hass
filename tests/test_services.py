@@ -1,4 +1,4 @@
-"""Service tests — every registered service round-trips through the fake bridge.
+"""Service tests - every registered service round-trips through the fake bridge.
 
 Instead of checking "did HA register 10 services" (which test_init
 already covers), these tests call each service and verify the exact
@@ -64,7 +64,7 @@ async def test_send_remote_key_forwards_cmd(
         blocking=True,
     )
 
-    # Filter out the handshake noise — just the cmd frames.
+    # Filter out the handshake noise - just the cmd frames.
     cmds = fake_server.received_cmds
     assert len(cmds) == 1
     assert cmds[0]["cmd"] == "send_remote_key"
@@ -140,7 +140,7 @@ async def test_virtual_remote_button_press_forwards_send_remote_key(
     """Pressing the virtual Play button fires send_remote_key key=Play.
 
     The entity is disabled by default so we re-enable it explicitly
-    — that's the real-world flow: user enables the buttons they
+    - that's the real-world flow: user enables the buttons they
     care about from the device page, then drags them onto a card.
     """
     await _setup(hass, fake_server)
@@ -204,14 +204,14 @@ async def test_services_only_registered_once_across_multiple_entries(
     """Loading a second config entry re-enters async_register_services.
 
     The idempotency guard (``has_service`` check) should short-circuit
-    the second call — without it we'd get "service already registered"
+    the second call - without it we'd get "service already registered"
     warnings and double-register handlers.
     """
     # First entry via the usual _setup helper.
     await _setup(hass, fake_server)
     assert hass.services.has_service(DOMAIN, "send_remote_key")
 
-    # Second entry on the same fake bridge — different unique_id so
+    # Second entry on the same fake bridge - different unique_id so
     # HA accepts it as a separate config entry, different host to
     # keep the unique_id keying obvious.
     second = MockConfigEntry(
@@ -228,7 +228,7 @@ async def test_services_only_registered_once_across_multiple_entries(
     second.add_to_hass(hass)
     # The fake server only tracks one connected client at a time but
     # the coordinator's async_start doesn't block on a clean handshake
-    # — it logs a warning and keeps trying. For this test we only
+    # - it logs a warning and keeps trying. For this test we only
     # care that the services-register path short-circuits.
     assert await hass.config_entries.async_setup(second.entry_id)
     await hass.async_block_till_done()

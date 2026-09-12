@@ -1,15 +1,15 @@
-"""Remote platform — a HA-native view of the Beoremote One.
+"""Remote platform - a HA-native view of the Beoremote One.
 
 Exposes the paired Beoremote as ``remote.lydbro_one``:
 
-  * ``is_on`` tracks the BLE link state — you know from HA whether the
+  * ``is_on`` tracks the BLE link state - you know from HA whether the
     remote is currently paired and reachable.
   * ``remote.send_command`` fires a virtual Beoremote key press at the
     bridge. Useful for automations that want to simulate a button
     without the physical remote (e.g. "on sunset, trigger Play").
 
 Commands map one-to-one to :data:`const.KNOWN_BUTTONS`. Unknown command
-names are passed through to the firmware — it will reject them if they
+names are passed through to the firmware - it will reject them if they
 aren't valid, and the service call will raise.
 """
 
@@ -64,7 +64,7 @@ class LydbroRemote(LydbroEntity, RemoteEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn-on means "reconnect the BLE link".
 
-        There's no firmware cmd for "force BLE scan/connect" — the
+        There's no firmware cmd for "force BLE scan/connect" - the
         bridge auto-reconnects on advertisement. Best we can do is
         nudge the user's mental model: if is_on is False, pressing any
         button on the physical remote wakes it.

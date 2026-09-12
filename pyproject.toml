@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Home Assistant custom integration for the Lydbro One Beoremote bridge"
 requires-python = ">=3.13"
 
-# This project is distributed via HACS, not PyPI — there is no wheel.
+# This project is distributed via HACS, not PyPI - there is no wheel.
 # pyproject.toml exists solely to host tool configuration (pytest,
 # ruff, mypy) in one place. Dev dependencies live in
 # requirements-dev.txt so ``pip install -r requirements-dev.txt``
@@ -22,7 +22,7 @@ addopts = [
     "--tb=short",
 ]
 filterwarnings = [
-    # HA itself raises a lot of DeprecationWarnings in test runs —
+    # HA itself raises a lot of DeprecationWarnings in test runs -
     # downgrading them to warnings keeps the test output readable.
     "default::DeprecationWarning",
     "default::PendingDeprecationWarning",
@@ -40,13 +40,13 @@ ignore = ["E501"]  # long lines are fine when they carry context
 python_version = "3.13"
 strict = true
 # Home Assistant itself publishes a loose py.typed but a lot of its
-# internals return Any — follow_imports=silent keeps those from
+# internals return Any - follow_imports=silent keeps those from
 # cascading into our own errors.
 follow_imports = "silent"
 # The tests/ tree is intentionally loose-typed; run strict only on
 # the integration package. Add tests later if we care.
 files = ["custom_components/lydbro"]
-# Third-party libs without type stubs — don't error on imports.
+# Third-party libs without type stubs - don't error on imports.
 [[tool.mypy.overrides]]
 module = ["voluptuous.*"]
 ignore_missing_imports = true

@@ -16,12 +16,12 @@ CONF_PORT: Final = "port"
 CONF_DEVICE_ID: Final = "device_id"
 CONF_NAME: Final = "name"
 
-# Dispatcher signals — per-entry, formatted with the config entry id
+# Dispatcher signals - per-entry, formatted with the config entry id
 SIGNAL_STATE_UPDATED: Final = "lydbro_state_updated_{}"
 SIGNAL_EVENT: Final = "lydbro_event_{}"
 SIGNAL_CONNECTION: Final = "lydbro_connection_{}"
 
-# Home Assistant bus events — the load-bearing hook for device triggers.
+# Home Assistant bus events - the load-bearing hook for device triggers.
 # Device triggers register an "event" platform trigger filtered on
 # event_data.device_id + name + kind; the coordinator fires these.
 EVENT_BUS_BUTTON: Final = "lydbro_button"
@@ -39,7 +39,7 @@ NUMERIC_STATE_KEYS: Final = ("battery",)
 # binary sensor once stayed on for a day after the remote disconnected.
 BOOL_STATE_KEYS: Final = ("ble_connected", "eth_up", "safe_mode")
 
-# Beoremote One button names — canonical set matching hid_client.h output.
+# Beoremote One button names - canonical set matching hid_client.h output.
 # Firmware publishes exactly these names; unknown names from the server are
 # handled gracefully by the event entity (ignored, not an error).
 KNOWN_BUTTONS: Final = (
@@ -99,6 +99,6 @@ BUTTON_KINDS: Final = ("click", "hold", "release", "double")
 REMOTE_MODES: Final = ("MUSIC", "TV", "RADIO", "HOMEMEDIA", "GAMES", "CONTROL")
 
 # All Beoremote buttons exposed as individual HA `button` entities.
-# Disabled by default — enable the ones you want from the HA device
+# Disabled by default - enable the ones you want from the HA device
 # page and drag them onto a Lovelace card. Mirrors KNOWN_BUTTONS exactly.
 COMMON_REMOTE_BUTTONS: Final = KNOWN_BUTTONS

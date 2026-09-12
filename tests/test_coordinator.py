@@ -1,4 +1,4 @@
-"""Coordinator tests — state merge, numeric coercion, bus-event fan-out.
+"""Coordinator tests - state merge, numeric coercion, bus-event fan-out.
 
 These verify the pieces :class:`LydbroCoordinator` layers on top of
 :class:`LydbroClient`:
@@ -10,7 +10,7 @@ These verify the pieces :class:`LydbroCoordinator` layers on top of
 * ``boot_phase`` events update the state dict;
 * ``button_press`` / ``menu_selection`` / ``scene_button`` events fire
   the corresponding HA bus events (``lydbro_button`` etc.) carrying
-  the HA device_id — this is the load-bearing hook for device triggers.
+  the HA device_id - this is the load-bearing hook for device triggers.
 """
 
 from __future__ import annotations
@@ -89,7 +89,7 @@ async def test_state_change_event_merges_delta(
     await fake_server.push_event("state_change", name="ble_connected", value=False)
     await _wait_for(lambda: coordinator.state["ble_connected"] is False)
 
-    # Battery survived — the delta only touched ble_connected.
+    # Battery survived - the delta only touched ble_connected.
     assert coordinator.state["battery"] == 87
     assert coordinator.state["eth_up"] is True
 
@@ -97,7 +97,7 @@ async def test_state_change_event_merges_delta(
 async def test_battery_string_delta_coerced_to_int(
     hass: HomeAssistant, fake_server: FakeLydbroServer
 ) -> None:
-    """Firmware delta frames send numeric fields as strings — coordinator fixes it.
+    """Firmware delta frames send numeric fields as strings - coordinator fixes it.
 
     Without this coercion the battery sensor flips between 87 and "42"
     across the snapshot/delta boundary and HA's numeric device_class
@@ -154,7 +154,7 @@ async def test_button_press_fires_lydbro_button_bus_event(
     """button_press frame → lydbro_button HA event carrying the HA device_id."""
     await _setup(hass, fake_server)
 
-    # Look up the HA registry id for the device — that's what the
+    # Look up the HA registry id for the device - that's what the
     # coordinator stamps into event data.
     from homeassistant.helpers import device_registry as dr
 
@@ -370,7 +370,7 @@ def test_coerce_numeric_passthrough_for_unexpected_types() -> None:
     """Non-str/int/float values pass through unchanged via the final branch."""
     from custom_components.lydbro.coordinator import _coerce_numeric
 
-    # JSON bool, list — not strictly valid for ``battery`` but the
+    # JSON bool, list - not strictly valid for ``battery`` but the
     # function's final ``return value`` branch hands them back
     # untouched rather than crashing.
     assert _coerce_numeric("battery", True) is True
@@ -389,7 +389,7 @@ async def test_event_before_device_registered_is_silently_dropped(
     """If _ha_device_id() is None the event-to-bus fan-out short-circuits.
 
     This is the defensive branch that handles events arriving before
-    any entity platform has registered the device — in practice it
+    any entity platform has registered the device - in practice it
     never happens (platforms forward before the client is flagged
     connected), but the code path is there and we pin it so a
     refactor that removes the guard surfaces the change.

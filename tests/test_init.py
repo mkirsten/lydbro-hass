@@ -107,7 +107,7 @@ async def test_setup_survives_initial_handshake_failure(
 
     The coordinator logs a warning and the client's reconnect loop
     keeps trying in the background. Entities come up as unavailable
-    rather than the entry failing outright — blocking setup on
+    rather than the entry failing outright - blocking setup on
     network reachability would strand users whose bridge booted
     slower than HA.
     """
@@ -138,7 +138,7 @@ async def test_setup_survives_initial_handshake_failure(
     coordinator: LydbroCoordinator = entry.runtime_data
     assert coordinator.available is False
 
-    # Clean up — the coordinator's reconnect task is still running.
+    # Clean up - the coordinator's reconnect task is still running.
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
 
@@ -155,7 +155,7 @@ async def test_options_update_triggers_reload(
     entry = await _setup_entry(hass, fake_server)
     assert entry.state is ConfigEntryState.LOADED
 
-    # Trigger the listener by updating options — any dict change
+    # Trigger the listener by updating options - any dict change
     # works, HA diffs the old vs new and fires the update callback.
     hass.config_entries.async_update_entry(entry, options={"foo": "bar"})
     await hass.async_block_till_done()

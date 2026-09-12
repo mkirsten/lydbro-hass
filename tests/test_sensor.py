@@ -1,14 +1,14 @@
-"""Sensor entity tests — last-button-press + current-mode.
+"""Sensor entity tests - last-button-press + current-mode.
 
 The existing battery / ip / firmware / boot_phase sensors are covered
 by test_init (they're all created at setup) and test_coordinator
 (they read from state). These two sensors are new and have their own
 moving parts worth testing directly:
 
-* ``sensor.*_last_button_press`` — timestamp device class, parsed
+* ``sensor.*_last_button_press`` - timestamp device class, parsed
   from the ISO string the coordinator stores in state; carries
   name/kind/mode as extra attributes.
-* ``sensor.*_current_mode`` — enum device class, reads
+* ``sensor.*_current_mode`` - enum device class, reads
   ``state['mode']`` and lowercases to match the translation keys.
 """
 

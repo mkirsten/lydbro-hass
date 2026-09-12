@@ -9,7 +9,7 @@ Since Home Assistant 2026.3.0, custom integrations ship their own brand
 images: HA looks for a `brand/` folder inside the integration directory
 and uses it in the UI, taking priority over the
 `brands.home-assistant.io` CDN. No `home-assistant/brands` PR is needed
-(that repo no longer accepts custom-integration icons — see the
+(that repo no longer accepts custom-integration icons - see the
 [brands proxy API announcement](https://developers.home-assistant.io/blog/2026/02/24/brands-proxy-api)).
 
 HACS's default-store validation likewise accepts an in-repo `brand/`

@@ -1,18 +1,18 @@
-"""Button platform — admin buttons plus per-key virtual Beoremote buttons.
+"""Button platform - admin buttons plus per-key virtual Beoremote buttons.
 
 Two flavours of button entity are created per device:
 
-* **Admin** — Reboot / Reset pairing / Disconnect Beoremote. These
+* **Admin** - Reboot / Reset pairing / Disconnect Beoremote. These
   sit under ``EntityCategory.CONFIG`` on the device page and fire
   bridge-level commands. There is deliberately no "rescan discovery"
   button: the bridge rescans on every boot, so the reboot button
   already covers that case.
-* **Virtual remote key** — one per entry in
+* **Virtual remote key** - one per entry in
   :data:`const.COMMON_REMOTE_BUTTONS` (Play, Pause, Volume Up, …).
   Each calls :meth:`LydbroCoordinator.async_send_cmd` with
   ``send_remote_key`` so an automation or Lovelace card can inject a
   button press without the physical remote. They are disabled by
-  default — enable the ones you need from the HA device page so the
+  default - enable the ones you need from the HA device page so the
   entity registry isn't swamped with 12 new entries per bridge.
 """
 
@@ -102,7 +102,7 @@ class LydbroVirtualRemoteButton(LydbroEntity, ButtonEntity):
     """A single Beoremote key exposed as a HA button entity.
 
     Pressing it fires the same ``send_remote_key`` cmd an automation
-    would invoke through ``remote.send_command`` — the value is
+    would invoke through ``remote.send_command`` - the value is
     discoverability and the ability to drag one onto a Lovelace card
     without scripting.
     """

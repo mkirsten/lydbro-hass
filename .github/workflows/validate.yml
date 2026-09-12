@@ -41,7 +41,7 @@ jobs:
             --cov-report=term-missing \
             --cov-fail-under=100
       - name: mypy strict
-        # Platinum strict-typing — see TODO.md. Keep strict=True on;
+        # Platinum strict-typing - see TODO.md. Keep strict=True on;
         # don't soften the config to make a red build green.
         run: python -m mypy
 

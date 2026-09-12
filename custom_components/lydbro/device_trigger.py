@@ -1,4 +1,4 @@
-"""Device triggers — the point-and-click automation UX.
+"""Device triggers - the point-and-click automation UX.
 
 Without these, a user who wants "run my script when the Beoremote Play
 button is held" has to write YAML that matches an event entity by ID
@@ -39,7 +39,7 @@ from .const import (
 #   menu_select             (single trigger, filter on name in the action)
 #
 # Click is the default kind. Hold and double are rare-but-valuable,
-# release is almost never what a user wants so we skip it — if someone
+# release is almost never what a user wants so we skip it - if someone
 # needs it they can still use the raw event entity.
 TRIGGER_KINDS = ("click", "hold", "double")
 
@@ -95,7 +95,7 @@ async def async_attach_trigger(
     device_id: str = config[CONF_DEVICE_ID]
 
     if trigger_type.startswith("button_"):
-        # button_<Name>_<kind>  — split from the right so button names
+        # button_<Name>_<kind>  - split from the right so button names
         # that contain underscores (e.g. "Play_Pause") still parse.
         body = trigger_type[len("button_") :]
         name, _, kind = body.rpartition("_")
@@ -110,14 +110,14 @@ async def async_attach_trigger(
         event_data = {"device_id": device_id}
     else:
         # TRIGGER_SCHEMA already rejects anything outside TRIGGER_TYPES
-        # via vol.In, so this branch is unreachable in practice — it
+        # via vol.In, so this branch is unreachable in practice - it
         # exists purely as a defensive backstop if the schema and the
         # type list ever drift apart.
         raise ValueError(  # pragma: no cover
             f"Unknown lydbro trigger type: {trigger_type}"
         )
 
-    # Use plain string keys — the HA-internal event_trigger module
+    # Use plain string keys - the HA-internal event_trigger module
     # re-exports CONF_PLATFORM / CONF_EVENT_TYPE / CONF_EVENT_DATA but
     # they aren't in its public (py.typed) surface, so mypy strict
     # complains about attr-defined on them. The schema accepts the

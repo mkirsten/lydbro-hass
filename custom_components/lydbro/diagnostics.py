@@ -5,7 +5,7 @@ frame, current state snapshot, and connection status so a user can
 attach it to a bug report without copy-pasting JSON from logs.
 
 Nothing on this device is sensitive (no credentials, no tokens, no
-personal data — just local IPs of Sonos/TVs on the same LAN), so we
+personal data - just local IPs of Sonos/TVs on the same LAN), so we
 don't redact anything. If that ever changes, redact here.
 """
 

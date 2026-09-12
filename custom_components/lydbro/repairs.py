@@ -3,9 +3,9 @@
 Surfaces two classes of problem to the HA Repairs dashboard so
 users see them without having to trawl through logs:
 
-* **safe_mode** — the bridge entered safe mode (crash loop). Severity
+* **safe_mode** - the bridge entered safe mode (crash loop). Severity
   ``error``. Clears when safe_mode drops back to False.
-* **low_battery** — the Beoremote One's battery is below
+* **low_battery** - the Beoremote One's battery is below
   :data:`LOW_BATTERY_THRESHOLD` percent. Severity ``warning``. Uses
   hysteresis (must recover past :data:`LOW_BATTERY_CLEAR`) so a
   remote bouncing around the threshold doesn't flap the issue on
@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 
 # Tunable thresholds. Kept at module scope so tests can monkeypatch
 # them without reaching into a class.
-LOW_BATTERY_THRESHOLD = 10  # %  — raise at or below this
-LOW_BATTERY_CLEAR = 15  # %  — clear once we recover past this
+LOW_BATTERY_THRESHOLD = 10  # %  - raise at or below this
+LOW_BATTERY_CLEAR = 15  # %  - clear once we recover past this
 
 
 def _issue_id(kind: str, device_id: str) -> str:
@@ -56,7 +56,7 @@ class LydbroIssueMonitor:
     def evaluate(self) -> None:
         """Evaluate the issue classes against the current state.
 
-        Safe to call from the event loop on every state update — all
+        Safe to call from the event loop on every state update - all
         interactions with the issue registry are idempotent, so
         repeating evaluations don't flap the UI.
         """

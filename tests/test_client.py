@@ -1,6 +1,6 @@
 """End-to-end tests for :class:`LydbroClient` against the fake server.
 
-These run the real client code over a real loopback socket — no
+These run the real client code over a real loopback socket - no
 mocking of the transport. If any of these break, the bridge-side
 protocol or the client's frame handling has regressed.
 """
@@ -93,7 +93,7 @@ async def test_hello_with_error_field_is_rejected(
     )
     await client.start()
     try:
-        # Handshake must NOT complete — the client raises, the read
+        # Handshake must NOT complete - the client raises, the read
         # loop tears the socket down, and the reconnect loop backs off.
         assert await client.wait_connected(timeout=0.5) is False
         assert recorder.connection_changes == []
@@ -357,7 +357,7 @@ async def test_send_cmd_while_disconnected_raises(
 
 
 # ---------------------------------------------------------------------------
-# Small error and edge paths — exist to pin coverage and protect against
+# Small error and edge paths - exist to pin coverage and protect against
 # silent regressions in the read loop's frame dispatcher.
 # ---------------------------------------------------------------------------
 
@@ -379,7 +379,7 @@ async def test_server_pong_is_silently_accepted(fake_server: FakeLydbroServer) -
     """A pong from the server is a no-op, not a malformed-frame drop."""
     client, _ = await _connected_client(fake_server)
     try:
-        # Push a raw pong — the client has no pending ping, so this
+        # Push a raw pong - the client has no pending ping, so this
         # just exercises the "ignore" branch of _handle_frame.
         await fake_server.push_raw(b'{"t":"pong"}\n')
         await asyncio.sleep(0.05)

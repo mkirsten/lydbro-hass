@@ -1,4 +1,4 @@
-# Lydbro Native TCP Protocol — v2
+# Lydbro Native TCP Protocol - v2
 
 Canonical wire-format spec for the bidirectional channel between the
 Lydbro One bridge and any client (the Home Assistant custom
@@ -8,15 +8,15 @@ integration is one; others are welcome). Runs on
 ## Design goals
 
 - **Push-based event stream** for BLE button presses, state changes,
-  and boot lifecycle — no polling, no SSE, no HTTP upgrade.
+  and boot lifecycle - no polling, no SSE, no HTTP upgrade.
 - **Bidirectional** over the same socket: commands flow client→server
   while events flow server→client, interleaved.
-- **Low latency** — persistent connection, ~5–15 ms round-trip on LAN.
-- **No broker dependency** — unlike MQTT, the integration works on
+- **Low latency** - persistent connection, ~5–15 ms round-trip on LAN.
+- **No broker dependency** - unlike MQTT, the integration works on
   every HA install type without extra setup.
-- **Simple** — newline-delimited JSON, readable on the wire. A
+- **Simple** - newline-delimited JSON, readable on the wire. A
   client can be written from scratch in an afternoon.
-- **Survives reconnects** — the client resyncs by reading the
+- **Survives reconnects** - the client resyncs by reading the
   `state` snapshot the server pushes after every successful
   handshake. Bus events are transient; the snapshot is authoritative.
 
@@ -27,7 +27,7 @@ integration is one; others are welcome). Runs on
   with `{"t":"error","code":"frame_too_large","max":4096}`.
 - **Encoding:** compact JSON, `"t"` (not `"type"`) at the message
   level to save bandwidth.
-- **No handshake gymnastics** — connect, read the first line
+- **No handshake gymnastics** - connect, read the first line
   (`hello` from server), reply with `hello_ack`, start exchanging.
 
 Every frame has a `"t"` field naming its type:
@@ -37,7 +37,7 @@ Every frame has a `"t"` field naming its type:
 | `hello`     | S → C (unsolicited, first frame) | Capabilities + device identity + `v` |
 | `hello_ack` | C → S     | Client identification + `v` negotiation |
 | `state`     | S → C     | Full state snapshot (after `hello_ack`, also on `get_state`) |
-| `event`     | S → C     | Push — bus event from the device |
+| `event`     | S → C     | Push - bus event from the device |
 | `cmd`       | C → S     | Command request with optional correlation `id` |
 | `result`    | S → C     | Command result paired with `cmd.id` |
 | `ping`      | either    | Keep-alive; peer replies with `pong` |
@@ -61,14 +61,14 @@ server → {"t":"result","id":1,"ok":true}
   time (see Versioning).
 - `id` in the hello is the device's MAC address (hex, lowercase, no
   separators). Stable unique id for config-flow deduplication.
-- `branch` names the firmware git branch the build came from —
+- `branch` names the firmware git branch the build came from -
   useful when running lab branches in parallel.
 - `caps` is a string array of optional features. v2 always includes
   `["events","cmds","state"]`; future additive caps can be added
   without bumping `v`.
 
 A server can refuse the connection by sending a hello with an
-`error` field instead — the canonical case is
+`error` field instead - the canonical case is
 `{"t":"hello","error":"too_many_clients"}`. The client MUST NOT
 send `hello_ack` in that case; the server will close right after.
 
@@ -86,7 +86,7 @@ send `hello_ack` in that case; the server will close right after.
 - `type` names the bus event. One frame per event, no batching.
 - `ts` is the device's `millis()` at publish time (uint32, wraps
   every ~49 days). Treat it as monotonic **within a connection
-  only** — do not compare across reconnects.
+  only** - do not compare across reconnects.
 - Per-type fields:
   - `button_press` / `button_release`: `name`, `kind`
     (`click` | `hold` | `double_click`), `mode`
@@ -95,11 +95,11 @@ send `hello_ack` in that case; the server will close right after.
     `id`, `mode`
   - `scene_button`: `name`, `position`
     (`top_left` | `top_right` | `bottom_left` | `bottom_right`), `mode`
-  - `state_change`: `name` (key), `value` (stringified — numeric fields
+  - `state_change`: `name` (key), `value` (stringified - numeric fields
     arrive as strings in deltas but as ints in the full `state` snapshot)
   - `boot_phase`: `phase` (human-readable string)
 
-Unknown `type` values MUST be ignored — that's how additive
+Unknown `type` values MUST be ignored - that's how additive
 evolution works without bumping `v`.
 
 ## State frames (server → client)
@@ -117,7 +117,7 @@ and apply subsequent `state_change` event deltas on top.
 
 v2 intentionally exposes a tiny surface. HA drives Sonos and TVs
 through its own integrations, so the bridge never needs to proxy
-those — the only commands on the wire are the ones that only the
+those - the only commands on the wire are the ones that only the
 bridge itself can execute.
 
 ```jsonc
@@ -138,15 +138,15 @@ bridge itself can execute.
 
 | `cmd` | args | Effect |
 |---|---|---|
-| `reboot` | — | `ESP.restart()` after `result` is sent. Discovery rescans automatically on the way back up. |
-| `reset_pairing` | — | Clear all BLE bonds + NVS pairing state + crash-loop boot counter, then reboot. The next boot comes up unpaired so any Beoremote can pair fresh. |
-| `ble_disconnect` | — | Force the remote to drop and reconnect with a fresh GATT session. **Does not** clear bonds. |
-| `send_remote_key` | `key` (required, string) | Publish a synthetic `button_press` on the internal event bus with the given Beoremote key name. Reuses the full mode-aware remote-dispatch pipeline — the bridge routes it to Sonos/TV/HA exactly as if the physical remote had been pressed. Valid key names are listed in the table below. |
-| `tv_send_key` | `key` (required, string) | Send a key directly to the configured TV (LG WebOS via SSAP / Samsung Tizen via REST), bypassing the event bus entirely. Works in any remote mode — unlike `send_remote_key`, this does not require the remote to be in TV mode. Key names follow platform conventions (`KEY_VOLUP`, `KEY_MUTE`, `KEY_HOME`, …). Since fw 0.48.0 the command is **asynchronous**: `ok:true` means *accepted* (queued for the bridge's TV worker task), not *delivered* — the bridge never blocks its main loop on a TV TLS handshake. `ok:false, error:"tv queue full"` means the TV is unreachable and the queue has backed up. |
+| `reboot` | - | `ESP.restart()` after `result` is sent. Discovery rescans automatically on the way back up. |
+| `reset_pairing` | - | Clear all BLE bonds + NVS pairing state + crash-loop boot counter, then reboot. The next boot comes up unpaired so any Beoremote can pair fresh. |
+| `ble_disconnect` | - | Force the remote to drop and reconnect with a fresh GATT session. **Does not** clear bonds. |
+| `send_remote_key` | `key` (required, string) | Publish a synthetic `button_press` on the internal event bus with the given Beoremote key name. Reuses the full mode-aware remote-dispatch pipeline - the bridge routes it to Sonos/TV/HA exactly as if the physical remote had been pressed. Valid key names are listed in the table below. |
+| `tv_send_key` | `key` (required, string) | Send a key directly to the configured TV (LG WebOS via SSAP / Samsung Tizen via REST), bypassing the event bus entirely. Works in any remote mode - unlike `send_remote_key`, this does not require the remote to be in TV mode. Key names follow platform conventions (`KEY_VOLUP`, `KEY_MUTE`, `KEY_HOME`, …). Since fw 0.48.0 the command is **asynchronous**: `ok:true` means *accepted* (queued for the bridge's TV worker task), not *delivered* - the bridge never blocks its main loop on a TV TLS handshake. `ok:false, error:"tv queue full"` means the TV is unreachable and the queue has backed up. |
 | `tv_launch_app` | `name` (required, string) | Launch a TV app by its user-visible name as configured in the bridge's TV source table (e.g. `"Netflix"`, `"Disney+"`, `"Spotify"`). Match is case-insensitive. Returns `ok:false, error:"app not found"` if the name doesn't match any configured source. Since fw 0.48.0 launches are **asynchronous** like `tv_send_key`: `ok:true` = accepted; delivery happens on the TV worker task (~0.6–12 s later). |
-| `get_state` | — | Server replies with a fresh `state` frame, then `{"t":"result","id":<id>,"ok":true}`. |
+| `get_state` | - | Server replies with a fresh `state` frame, then `{"t":"result","id":<id>,"ok":true}`. |
 
-#### `send_remote_key` — valid key names
+#### `send_remote_key` - valid key names
 
 The `key` field must be exactly one of the following strings (case-sensitive).
 Unknown names produce `result.ok=false, error:"unknown key"`.
@@ -165,9 +165,9 @@ Unknown names produce `result.ok=false, error:"unknown key"`.
 
 Notes:
 - `Select` is the confirm button (center of the nav ring).
-- `Music` and `TV` switch the remote's operating mode and route the next key presses accordingly — they do not directly control a Sonos or TV device on their own.
+- `Music` and `TV` switch the remote's operating mode and route the next key presses accordingly - they do not directly control a Sonos or TV device on their own.
 - `Play` toggles play/pause on the current Sonos source when the remote is in Music mode.
-- Scene / MyButton positions (`top_left`, `top_right`, …) are **not** injectable via `send_remote_key` — they fire as `EVT_SCENE_BUTTON` (a different bus event type) and require a separate command not yet in v2.
+- Scene / MyButton positions (`top_left`, `top_right`, …) are **not** injectable via `send_remote_key` - they fire as `EVT_SCENE_BUTTON` (a different bus event type) and require a separate command not yet in v2.
 
 ### Deliberately not in v2
 
@@ -178,7 +178,7 @@ Notes:
   `reboot` gets you a fresh device list for free.
 - **No `config_set` / `config_get`.** Configuration still lives on
   the device's HTTP `/api/config` endpoint served by the local
-  web UI — out of scope for the wire protocol.
+  web UI - out of scope for the wire protocol.
 
 If you find yourself wanting any of these, use HA's own
 integration for the target, or POST to the device's `/api/*`
@@ -195,7 +195,7 @@ surface. Don't expand this table.
 - `error` is a short human-readable string when `ok=false`.
   Optional on success.
 - Results arrive **interleaved** with events. A client MUST NOT
-  block the read loop waiting for one specific `result` — match on
+  block the read loop waiting for one specific `result` - match on
   `id` instead.
 - For `reboot` and `reset_pairing` the server sends the `result`
   **before** calling `ESP.restart()`, so clients see `ok:true` just
@@ -222,7 +222,7 @@ Unsolicited server-side errors use:
 ```
 
 These do NOT close the connection on their own, *except* for
-`unsupported_version`, which is a handshake failure — the server
+`unsupported_version`, which is a handshake failure - the server
 closes immediately after sending it.
 
 ## Reconnect semantics
@@ -235,7 +235,7 @@ On disconnect the client reconnects with exponential backoff (1 s,
 3. The client replaces any cached state with that snapshot. Events
    delivered after the snapshot apply on top.
 
-There is **no replay** of missed events — bus events are transient,
+There is **no replay** of missed events - bus events are transient,
 and the state snapshot is authoritative for "what the world looks
 like now." Same model as ESPHome's native API.
 
@@ -248,7 +248,7 @@ like now." Same model as ESPHome's native API.
 - **Breaking** changes (renaming or removing a field, changing
   semantics, changing framing, **removing a command from the
   wire**) bump `v`. Both sides hard-check `v` at `hello` /
-  `hello_ack` time and refuse the connection on mismatch —
+  `hello_ack` time and refuse the connection on mismatch -
   a client with the wrong version gets `unsupported_version` and
   the socket closes. There is deliberately no "negotiate down to a
   lower version" path; the failure mode is explicit rather than
@@ -256,14 +256,14 @@ like now." Same model as ESPHome's native API.
 
 ### Changelog
 
-- **v2** (firmware 0.13.0+, lydbro-hass 0.2.0+) — Hard `v` gate on
+- **v2** (firmware 0.13.0+, lydbro-hass 0.2.0+) - Hard `v` gate on
   `hello` / `hello_ack`. Wire command surface trimmed to
   `reboot` / `reset_pairing` / `ble_disconnect` /
   `send_remote_key` / `get_state`. All `sonos_*`, `tv_*`, and
-  `rescan_discovery` commands removed — HA controls those targets
+  `rescan_discovery` commands removed - HA controls those targets
   directly. New `reset_pairing` command added. `hello` gains a
   `branch` field.
-- **v1** (firmware 0.11.4.0 – 0.12.4, lydbro-hass 0.1.x) — Initial
+- **v1** (firmware 0.11.4.0 – 0.12.4, lydbro-hass 0.1.x) - Initial
   release. Soft version check; wide command surface including
   TV/Sonos proxy commands.
 

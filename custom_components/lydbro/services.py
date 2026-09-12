@@ -1,12 +1,12 @@
 """Service handlers for Lydbro.
 
-The Lydbro One is a bridge from the Beoremote One to Sonos / TVs / HA —
+The Lydbro One is a bridge from the Beoremote One to Sonos / TVs / HA -
 it talks outbound to those targets when the remote triggers it. There
 is intentionally no HA→bridge→Sonos or HA→bridge→TV path: HA already
 controls Sonos and TVs directly, so routing through the ESP32 would
 just be a detour.
 
-The only service we expose is ``send_remote_key`` — injecting a
+The only service we expose is ``send_remote_key`` - injecting a
 virtual Beoremote key press so automations can reuse the bridge's
 dispatch logic. Bridge-level admin actions (reboot, reset pairing,
 disconnect Beoremote) live on the device page as button entities
@@ -76,7 +76,7 @@ def async_register_services(hass: HomeAssistant) -> None:
 
     async def tv_launch_app(call: ServiceCall) -> None:
         coord = _coordinator_for(hass, call)
-        # Wire field is "name" — adapter_tv_dispatch looks up args.param
+        # Wire field is "name" - adapter_tv_dispatch looks up args.param
         # against the configured TV source table by user-visible name.
         await coord.async_send_cmd("tv_launch_app", name=call.data["app"])
 

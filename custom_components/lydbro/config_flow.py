@@ -29,7 +29,7 @@ async def _probe(host: str, port: int) -> dict[str, Any]:
         hello.update(frame)
         done.set()
 
-    # The probe only needs ``on_hello`` — the client's callback
+    # The probe only needs ``on_hello`` - the client's callback
     # interface requires all three, but state and event frames that
     # arrive after hello are discarded. Whether they fire at all
     # depends on a race between ``client.stop()`` and the next
@@ -112,7 +112,7 @@ class LydbroConfigFlow(ConfigFlow, domain=DOMAIN):
         delete-and-re-add (which would orphan automations keyed to the
         device registry id), this flow re-probes the supplied address
         and updates the existing entry in place. The probed hello must
-        carry the same ``id`` as the configured entry — we refuse to
+        carry the same ``id`` as the configured entry - we refuse to
         point an existing entry at a different physical device, because
         that would silently break unique_id invariants and entity links.
         """

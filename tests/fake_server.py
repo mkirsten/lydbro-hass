@@ -104,7 +104,7 @@ class FakeLydbroServer:
         self._server = await asyncio.start_server(self._handle_client, host="127.0.0.1", port=0)
 
     async def stop(self) -> None:
-        # Cancel any in-flight cmd handlers first — they may be
+        # Cancel any in-flight cmd handlers first - they may be
         # awaiting sleeps or events and would otherwise hang the
         # client connection task we're about to cancel.
         for task in list(self._cmd_tasks):
@@ -202,7 +202,7 @@ class FakeLydbroServer:
                     await self._send({"t": "pong"})
                 elif ftype == "cmd":
                     if frame.get("cmd") == "24601" and self.cmd_handler is None:
-                        # Easter egg — mirror firmware behaviour when no
+                        # Easter egg - mirror firmware behaviour when no
                         # custom handler is installed. Don't pollute
                         # received_cmds so tests that count cmds stay clean.
                         await self._send(
@@ -218,7 +218,7 @@ class FakeLydbroServer:
                     self.received_cmds.append(frame)
                     result = await self._answer_cmd(frame)
                     await self._send(result)
-                # Silently ignore anything else — the real server does too.
+                # Silently ignore anything else - the real server does too.
         except (ConnectionResetError, BrokenPipeError, asyncio.IncompleteReadError):
             pass
         finally:

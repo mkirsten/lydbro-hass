@@ -1,13 +1,13 @@
-"""Event platform — Beoremote One button, menu, and scene events.
+"""Event platform - Beoremote One button, menu, and scene events.
 
 Three event entities are created per device:
-  * ``event.<device>_button``  — every physical button press. The
+  * ``event.<device>_button``  - every physical button press. The
     ``event_type`` is the button name ("Play", "Next", ...); ``kind``
     (click / hold / double / release) and ``mode`` (MUSIC / TV / ...)
     come through as attributes.
-  * ``event.<device>_menu``    — vendor-menu selections from the
+  * ``event.<device>_menu``    - vendor-menu selections from the
     remote's custom UI. ``event_type`` is the menu item name.
-  * ``event.<device>_scene``   — the four corner "scene" buttons
+  * ``event.<device>_scene``   - the four corner "scene" buttons
     (N/E/S/W).
 
 Device triggers in :mod:`.device_trigger` build a nicer automation-
@@ -49,7 +49,7 @@ async def async_setup_entry(
 
 
 class _LydbroEventBase(LydbroEntity, EventEntity):
-    """Shared wiring — subscribes to the event dispatcher and filters."""
+    """Shared wiring - subscribes to the event dispatcher and filters."""
 
     def __init__(self, coordinator: LydbroCoordinator, key: str) -> None:
         super().__init__(coordinator)
@@ -68,7 +68,7 @@ class _LydbroEventBase(LydbroEntity, EventEntity):
 
     @callback
     def _handle_frame(self, frame: dict[str, Any]) -> None:
-        # Abstract — every concrete subclass overrides. Kept as a
+        # Abstract - every concrete subclass overrides. Kept as a
         # raise so a future subclass that forgets to override fails
         # loudly instead of silently dropping frames.
         raise NotImplementedError  # pragma: no cover
@@ -81,7 +81,7 @@ class LydbroButtonEvent(_LydbroEventBase):
 
     def __init__(self, coordinator: LydbroCoordinator) -> None:
         super().__init__(coordinator, "button")
-        # Per-instance list — never mutate a class-level list, that would
+        # Per-instance list - never mutate a class-level list, that would
         # leak state across devices on a multi-bridge install.
         self._attr_event_types = list(KNOWN_BUTTONS)
 
@@ -91,7 +91,7 @@ class LydbroButtonEvent(_LydbroEventBase):
             return
         name = frame.get("name")
         if not isinstance(name, str) or name not in self._attr_event_types:
-            # Drop rather than mutate event_types at runtime — HA's
+            # Drop rather than mutate event_types at runtime - HA's
             # event platform doesn't reliably propagate dynamic
             # additions to the frontend picker. If firmware starts
             # emitting a new button, add it to KNOWN_BUTTONS in const.py.

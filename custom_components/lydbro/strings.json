@@ -31,7 +31,7 @@
       "reconfigure_successful": "Lydbro One address updated."
     },
     "create_entry": {
-      "default": "**{name}** is connected.\n\nEntities and events are ready — use them in automations and dashboards as usual.\n\nFor everything that lives on the bridge itself (pairing, scene buttons, TV/music sources, command routing, firmware, logs), open the device's web UI via the **Visit** button on the device page."
+      "default": "**{name}** is connected.\n\nEntities and events are ready - use them in automations and dashboards as usual.\n\nFor everything that lives on the bridge itself (pairing, scene buttons, TV/music sources, command routing, firmware, logs), open the device's web UI via the **Visit** button on the device page."
     }
   },
   "exceptions": {

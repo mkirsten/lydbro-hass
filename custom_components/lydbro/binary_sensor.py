@@ -19,7 +19,7 @@ from . import LydbroConfigEntry
 from .coordinator import LydbroCoordinator
 from .entity import LydbroEntity
 
-# Push-based integration — updates arrive over a persistent TCP connection,
+# Push-based integration - updates arrive over a persistent TCP connection,
 # so there is no benefit to serialising entity refreshes.
 PARALLEL_UPDATES = 0
 

@@ -3,7 +3,7 @@
 The trigger layer translates "Lydbro One: Play button clicked" from
 the HA automation editor into an event-platform trigger that listens
 for the bus events :class:`LydbroCoordinator` fires. These tests
-verify that mapping end-to-end — register a trigger, fire the
+verify that mapping end-to-end - register a trigger, fire the
 matching bus event from the fake bridge, and assert the automation
 action runs.
 """
@@ -71,7 +71,7 @@ def service_calls(hass: HomeAssistant) -> list[ServiceCall]:
     """Register a ``test.trigger_fired`` service and collect its calls.
 
     ``async_mock_service`` returns the list that HA appends each
-    ServiceCall to — using it instead of a manual async_register
+    ServiceCall to - using it instead of a manual async_register
     avoids a subtle caching quirk where HA doesn't call the handler
     if the service wasn't set up through the proper helper.
     """
@@ -93,7 +93,7 @@ async def test_get_triggers_lists_button_scene_and_menu(
         hass, DeviceAutomationType.TRIGGER, ha_device_id
     )
     # The helper aggregates triggers from every device-automation
-    # source — HA's built-in button/event entity triggers plus our
+    # source - HA's built-in button/event entity triggers plus our
     # lydbro ones. Filter to the Lydbro-domain subset before asserting
     # on trigger types.
     lydbro_triggers = [t for t in all_triggers if t["domain"] == DOMAIN]
@@ -145,17 +145,17 @@ async def test_button_trigger_fires_automation(
     )
     await hass.async_block_till_done()
 
-    # Wrong kind — should not fire.
+    # Wrong kind - should not fire.
     await fake_server.push_event("button_press", name="Play", kind="hold", mode="MUSIC")
     await asyncio.sleep(0.05)
     assert service_calls == []
 
-    # Wrong name — should not fire.
+    # Wrong name - should not fire.
     await fake_server.push_event("button_press", name="Next", kind="click", mode="MUSIC")
     await asyncio.sleep(0.05)
     assert service_calls == []
 
-    # Matching frame — should fire exactly once.
+    # Matching frame - should fire exactly once.
     await fake_server.push_event("button_press", name="Play", kind="click", mode="MUSIC")
     await _wait_for_calls(service_calls, 1)
 
@@ -200,7 +200,7 @@ async def test_menu_trigger_fires_on_any_menu_event(
     fake_server: FakeLydbroServer,
     service_calls: list[ServiceCall],
 ) -> None:
-    """menu_select is a single catch-all trigger — name filtering is in the action."""
+    """menu_select is a single catch-all trigger - name filtering is in the action."""
     ha_device_id = await _setup_and_device_id(hass, fake_server)
 
     assert await async_setup_component(

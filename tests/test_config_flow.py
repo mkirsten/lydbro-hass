@@ -2,10 +2,10 @@
 
 Covers every entry point into the flow:
 
-* ``async_step_user``     — manual host/port entry.
-* ``async_step_zeroconf`` — mDNS discovery of ``_lydbro._tcp``.
-* ``async_step_discovery_confirm`` — user-facing confirm of a zeroconf hit.
-* ``async_step_reconfigure`` — in-place host/port update on an existing entry.
+* ``async_step_user``     - manual host/port entry.
+* ``async_step_zeroconf`` - mDNS discovery of ``_lydbro._tcp``.
+* ``async_step_discovery_confirm`` - user-facing confirm of a zeroconf hit.
+* ``async_step_reconfigure`` - in-place host/port update on an existing entry.
 
 Tests run the real flow code against :class:`FakeLydbroServer` over a
 loopback socket, so ``_probe`` is exercised end-to-end. The only thing
@@ -263,7 +263,7 @@ async def test_reconfigure_wrong_device(hass: HomeAssistant, fake_server: FakeLy
     entry = await _existing_entry(hass, host="10.0.0.99", port=1234, device_id="de:ad:be:ef:00:01")
 
     result = await entry.start_reconfigure_flow(hass)
-    # The fake server's hello id is aa:bb:... — a different device.
+    # The fake server's hello id is aa:bb:... - a different device.
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {CONF_HOST: "127.0.0.1", CONF_PORT: fake_server.port},
@@ -273,7 +273,7 @@ async def test_reconfigure_wrong_device(hass: HomeAssistant, fake_server: FakeLy
     assert result["step_id"] == "reconfigure"
     assert result["errors"] == {"base": "wrong_device"}
 
-    # Entry untouched — we refuse to repoint it at a different unit.
+    # Entry untouched - we refuse to repoint it at a different unit.
     refreshed = hass.config_entries.async_get_entry(entry.entry_id)
     assert refreshed is not None
     assert refreshed.data[CONF_HOST] == "10.0.0.99"

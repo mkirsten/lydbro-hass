@@ -11,14 +11,14 @@ native integration.
   Mosquitto is down.
 - **Lower latency.** Events arrive in HA with no MQTT queueing.
 - **First-class entities.** Battery, boot phase, BLE link state and
-  firmware version all show up as HA entities — no template sensors to
+  firmware version all show up as HA entities - no template sensors to
   hand-maintain.
 - **Device triggers.** The automation editor shows a per-button
   dropdown (*"Beoremote → Play button held"*) instead of requiring you
   to hand-filter MQTT payloads.
 - **Services.** `remote.send_command` and `lydbro.send_remote_key`
   are typed and discoverable in Developer Tools. (The bridge drives
-  Sonos and TVs itself in response to remote presses — HA controls
+  Sonos and TVs itself in response to remote presses - HA controls
   them through its own Sonos / TV integrations, not through
   Lydbro.)
 
@@ -37,14 +37,14 @@ The MQTT payload on `lydbro-one/out` → the native HA bus events:
 
 ## Bus events
 
-The integration fires three Home Assistant bus events — listen to
+The integration fires three Home Assistant bus events - listen to
 these from your automation triggers:
 
-- **`lydbro_button`** — fired on every physical Beoremote button
+- **`lydbro_button`** - fired on every physical Beoremote button
   press. `event_data`: `device_id`, `name`, `kind`, `mode`, `ts`.
-- **`lydbro_menu`** — fired on vendor-menu selections. `event_data`:
+- **`lydbro_menu`** - fired on vendor-menu selections. `event_data`:
   `device_id`, `name`, `source`, `id`, `mode`, `ts`.
-- **`lydbro_scene`** — fired on the four physical corner scene
+- **`lydbro_scene`** - fired on the four physical corner scene
   buttons. `event_data`: `device_id`, `name`, `position`, `mode`, `ts`.
   `position` is one of `top_left`, `top_right`, `bottom_left`,
   `bottom_right`.
@@ -91,7 +91,7 @@ menu dispatch, key mapping and scene corner buttons.
 
 ## Keeping both transports
 
-The firmware only runs one HA transport at a time — when you select
+The firmware only runs one HA transport at a time - when you select
 `ha_type=3` (Native TCP), the MQTT adapter stops publishing. If you
 need a smooth cut-over, build and test the new automation alongside
 the old one (different `id`), flip `ha_type`, then delete the old

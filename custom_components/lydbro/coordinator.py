@@ -1,4 +1,4 @@
-"""Coordinator — owns the TCP client and fans out state/events to entities."""
+"""Coordinator - owns the TCP client and fans out state/events to entities."""
 
 from __future__ import annotations
 
@@ -14,11 +14,11 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .client import CONNECT_TIMEOUT, LydbroClient, LydbroProtocolError
 from .const import (
+    BOOL_STATE_KEYS,
     DOMAIN,
     EVENT_BUS_BUTTON,
     EVENT_BUS_MENU,
     EVENT_BUS_SCENE,
-    BOOL_STATE_KEYS,
     NUMERIC_STATE_KEYS,
     SIGNAL_CONNECTION,
     SIGNAL_EVENT,
@@ -114,7 +114,7 @@ class LydbroCoordinator:
         await self._client.start()
         ok = await self._client.wait_connected(CONNECT_TIMEOUT + 2.0)
         if not ok:
-            # Don't fail setup — reconnect loop keeps trying in the
+            # Don't fail setup - reconnect loop keeps trying in the
             # background. Entities come up as unavailable until the
             # first snapshot lands.
             _LOGGER.warning(
@@ -158,7 +158,7 @@ class LydbroCoordinator:
 
         Device triggers need the registry id, not the lydbro MAC-based
         ``device_id``. The device is registered when the first entity
-        platform adds entities, so this returns None until then — we
+        platform adds entities, so this returns None until then - we
         look up lazily on every button press rather than caching.
         """
         registry = dr.async_get(self.hass)
@@ -212,7 +212,7 @@ class LydbroCoordinator:
                 state_touched = True
 
         # Every event frame that carries a ``mode`` field is a truthful
-        # report of the remote's current mode — use the most recent one
+        # report of the remote's current mode - use the most recent one
         # as the device's "current mode". This is how the mode sensor
         # tracks MUSIC / TV / RADIO / … since the firmware doesn't
         # publish mode in the state snapshot.
@@ -240,7 +240,7 @@ class LydbroCoordinator:
         async_dispatcher_send(self.hass, SIGNAL_EVENT.format(self.entry.entry_id), frame)
 
         # Fire HA bus events for button / menu / scene presses. This is
-        # how device triggers attach — they register an "event" trigger
+        # how device triggers attach - they register an "event" trigger
         # filtered by event_data.device_id + name + kind, so the bus
         # event is the load-bearing thing (not just the dispatcher).
         if etype in ("button_press", "menu_selection", "scene_button"):

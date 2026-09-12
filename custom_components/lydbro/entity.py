@@ -1,4 +1,4 @@
-"""Base entity for Lydbro — shared device_info + dispatcher plumbing."""
+"""Base entity for Lydbro - shared device_info + dispatcher plumbing."""
 
 from __future__ import annotations
 

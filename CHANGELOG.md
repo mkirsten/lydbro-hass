@@ -14,7 +14,7 @@ All notable changes to this integration are documented here.
   lowercase r). Display names of the link, battery, pairing and
   disconnect entities change accordingly; entity IDs are unaffected.
 
-## [0.2.6] — 2026-07-04
+## [0.2.6] - 2026-07-04
 
 Discoverability release for the HACS default-store submission.
 
@@ -24,7 +24,7 @@ Discoverability release for the HACS default-store submission.
   integration's own `brand/` directory, HA ≥ 2026.3.0 style).
 - README/HACS info page copy fixes; no code changes.
 
-## [0.2.5] — 2026-07-04
+## [0.2.5] - 2026-07-04
 
 First public release (HACS custom repository).
 
@@ -35,13 +35,13 @@ First public release (HACS custom repository).
 - Battery sensor hardened: no longer unavailable when the remote
   is disconnected, and null battery values no longer crash the
   sensor.
-- Dropped the BLE-out-of-range repair issue (noise — BLE link
+- Dropped the BLE-out-of-range repair issue (noise - BLE link
   binary sensor covers it).
 
-## [0.2.0] — Unreleased
+## [0.2.0] - Unreleased
 
 **Breaking**: wire protocol bumped to v2. Requires Lydbro One
-firmware ≥ 0.13.0 — older firmware will be rejected on
+firmware ≥ 0.13.0 - older firmware will be rejected on
 `hello_ack` with `unsupported_version`.
 
 - Dropped HA→bridge→Sonos/TV proxy services. The bridge still
@@ -49,11 +49,11 @@ firmware ≥ 0.13.0 — older firmware will be rejected on
   controls them through its own integrations, not through Lydbro.
 - Dropped the `rescan_discovery` service and button. Discovery
   runs on every boot, so the existing **Reboot** button covers it.
-- Added **Reset Beoremote pairing** admin button — clears all BLE
+- Added **Reset Beoremote pairing** admin button - clears all BLE
   bonds on the bridge and reboots, letting any Beoremote pair
   fresh.
 
-## [0.1.0] — Unreleased
+## [0.1.0] - Unreleased
 
 Initial release.
 

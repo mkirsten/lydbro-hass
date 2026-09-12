@@ -2,12 +2,12 @@
 
 Two layers:
 
-* :func:`fake_server` — starts :class:`FakeLydbroServer` on a random
+* :func:`fake_server` - starts :class:`FakeLydbroServer` on a random
   loopback port, yields it to the test, shuts it down on teardown.
   Pair with :func:`LydbroClient` for pure-client tests that don't
   need a Home Assistant runtime.
 
-* :func:`enable_custom_integrations` — standard
+* :func:`enable_custom_integrations` - standard
   ``pytest-homeassistant-custom-component`` fixture that lets the test
   HA instance pick up ``custom_components/lydbro/``. Required for any
   test that uses :func:`hass` or sets up a config entry.

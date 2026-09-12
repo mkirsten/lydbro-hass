@@ -2,7 +2,7 @@
 #
 # pytest-homeassistant-custom-component pulls in homeassistant itself
 # as a transitive dependency. Recent HA (2026.x) requires Python
-# 3.13+ — if you create the venv with an older interpreter, pip will
+# 3.13+ - if you create the venv with an older interpreter, pip will
 # silently resolve to a much older HA (2025.1.x) that doesn't match
 # what the integration targets, and zeroconf imports break.
 #

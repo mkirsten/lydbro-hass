@@ -80,7 +80,7 @@ SENSORS: tuple[LydbroSensorDescription, ...] = (
         entity_registry_enabled_default=False,
         value_fn=lambda s: s.get("ip"),
     ),
-    # Dashboard-oriented sensors — not diagnostic, but not on by
+    # Dashboard-oriented sensors - not diagnostic, but not on by
     # default either, because not every user wants them cluttering
     # the device page.
     LydbroSensorDescription(

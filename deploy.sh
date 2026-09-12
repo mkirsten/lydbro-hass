@@ -8,7 +8,7 @@
 set -euo pipefail
 
 if [[ -z "${HA_SSH:-}" || -z "${HA_URL:-}" || -z "${HA_TOKEN:-}" ]]; then
-  echo "HA_SSH, HA_URL and HA_TOKEN must all be set — see usage in the header" >&2
+  echo "HA_SSH, HA_URL and HA_TOKEN must all be set - see usage in the header" >&2
   exit 1
 fi
 

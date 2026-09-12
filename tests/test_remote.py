@@ -5,7 +5,7 @@ One as a HA remote:
 
 * ``is_on`` tracks the BLE link state.
 * ``remote.send_command`` forwards each string to the firmware as
-  ``send_remote_key`` — one cmd per key.
+  ``send_remote_key`` - one cmd per key.
 * ``remote.turn_off`` issues ``ble_disconnect``; ``turn_on`` is a
   no-op (the bridge auto-reconnects when the remote wakes).
 """
@@ -103,7 +103,7 @@ async def test_remote_turn_off_issues_ble_disconnect(
 
 
 async def test_remote_turn_on_is_no_op(hass: HomeAssistant, fake_server: FakeLydbroServer) -> None:
-    """turn_on has no firmware cmd — it's a user-facing hint, no-op under the hood."""
+    """turn_on has no firmware cmd - it's a user-facing hint, no-op under the hood."""
     await _setup(hass, fake_server)
 
     await hass.services.async_call(

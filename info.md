@@ -1,12 +1,12 @@
 # Lydbro for Home Assistant
 
-Native integration for [Lydbro](https://lydbro.com) devices — control and
+Native integration for [Lydbro](https://lydbro.com) devices - control and
 automate your Beoremote One via a Lydbro One bridge.
 
 ## Features
 
 - **Zero-config discovery** via mDNS (`_lydbro._tcp`)
-- **Local push** — persistent TCP connection, button presses arrive in HA
+- **Local push** - persistent TCP connection, button presses arrive in HA
   with <50ms latency
 - **Event entities** for every Beoremote One button, mode, and scene
 - **Sensors** for battery, BLE link state, and boot phase
