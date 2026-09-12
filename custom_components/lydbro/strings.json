@@ -48,18 +48,18 @@
       "description": "The Lydbro bridge **{name}** at `{host}` entered safe mode after repeated crashes. The web UI is still reachable so you can fix the configuration and reboot the device. Once the bridge boots normally this notification will clear automatically."
     },
     "low_battery": {
-      "title": "BeoRemote One battery low",
-      "description": "The BeoRemote One paired with this Lydbro bridge is at **{battery}%**. Charge or replace the batteries. This notification will clear automatically once the battery recovers."
+      "title": "Beoremote One battery low",
+      "description": "The Beoremote One paired with this Lydbro bridge is at **{battery}%**. Charge or replace the batteries. This notification will clear automatically once the battery recovers."
     }
   },
   "entity": {
     "binary_sensor": {
-      "ble_connected": { "name": "BeoRemote link" },
+      "ble_connected": { "name": "Beoremote link" },
       "ethernet": { "name": "Ethernet" },
       "safe_mode": { "name": "Safe mode" }
     },
     "sensor": {
-      "battery": { "name": "BeoRemote battery" },
+      "battery": { "name": "Beoremote battery" },
       "boot_phase": { "name": "Boot phase" },
       "firmware_version": { "name": "Firmware" },
       "ip_address": { "name": "IP address" },
@@ -78,8 +78,8 @@
     },
     "button": {
       "reboot": { "name": "Reboot" },
-      "reset_pairing": { "name": "Reset BeoRemote pairing" },
-      "ble_disconnect": { "name": "Disconnect BeoRemote" },
+      "reset_pairing": { "name": "Reset Beoremote pairing" },
+      "ble_disconnect": { "name": "Disconnect Beoremote" },
       "remote_key_play": { "name": "Play" },
       "remote_key_pause": { "name": "Pause" },
       "remote_key_next": { "name": "Next" },
@@ -125,7 +125,7 @@
       "scene": { "name": "Scene" }
     },
     "remote": {
-      "remote": { "name": "BeoRemote" }
+      "remote": { "name": "Beoremote" }
     }
   }
 }

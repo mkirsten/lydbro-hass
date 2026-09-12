@@ -1,15 +1,15 @@
 """Service handlers for Lydbro.
 
-The Lydbro One is a bridge from the BeoRemote One to Sonos / TVs / HA —
+The Lydbro One is a bridge from the Beoremote One to Sonos / TVs / HA —
 it talks outbound to those targets when the remote triggers it. There
 is intentionally no HA→bridge→Sonos or HA→bridge→TV path: HA already
 controls Sonos and TVs directly, so routing through the ESP32 would
 just be a detour.
 
 The only service we expose is ``send_remote_key`` — injecting a
-virtual BeoRemote key press so automations can reuse the bridge's
+virtual Beoremote key press so automations can reuse the bridge's
 dispatch logic. Bridge-level admin actions (reboot, reset pairing,
-disconnect BeoRemote) live on the device page as button entities
+disconnect Beoremote) live on the device page as button entities
 rather than services; they're one-off actions, not automation inputs.
 
 All services take a ``device_id`` (HA device registry id) to identify

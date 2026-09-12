@@ -1,8 +1,8 @@
-"""Button platform — admin buttons plus per-key virtual BeoRemote buttons.
+"""Button platform — admin buttons plus per-key virtual Beoremote buttons.
 
 Two flavours of button entity are created per device:
 
-* **Admin** — Reboot / Reset pairing / Disconnect BeoRemote. These
+* **Admin** — Reboot / Reset pairing / Disconnect Beoremote. These
   sit under ``EntityCategory.CONFIG`` on the device page and fire
   bridge-level commands. There is deliberately no "rescan discovery"
   button: the bridge rescans on every boot, so the reboot button
@@ -61,7 +61,7 @@ BUTTONS: tuple[tuple[ButtonEntityDescription, str], ...] = (
 
 
 def _virtual_key_entity_key(button_name: str) -> str:
-    """Slugify a BeoRemote button name for use in an entity unique_id.
+    """Slugify a Beoremote button name for use in an entity unique_id.
 
     ``"Volume Up"`` → ``"volume_up"``. The slugified form is stable
     across renames so users don't lose entity customisations if the
@@ -99,7 +99,7 @@ class LydbroButton(LydbroEntity, ButtonEntity):
 
 
 class LydbroVirtualRemoteButton(LydbroEntity, ButtonEntity):
-    """A single BeoRemote key exposed as a HA button entity.
+    """A single Beoremote key exposed as a HA button entity.
 
     Pressing it fires the same ``send_remote_key`` cmd an automation
     would invoke through ``remote.send_command`` — the value is

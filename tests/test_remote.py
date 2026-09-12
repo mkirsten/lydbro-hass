@@ -1,6 +1,6 @@
 """Remote-entity tests.
 
-The ``remote.lab_beoremote_one_*`` entity wraps the paired BeoRemote
+The ``remote.lab_beoremote_one_*`` entity wraps the paired Beoremote
 One as a HA remote:
 
 * ``is_on`` tracks the BLE link state.

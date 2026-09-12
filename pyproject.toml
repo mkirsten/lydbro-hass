@@ -1,7 +1,7 @@
 [project]
 name = "lydbro-hass"
 version = "0.1.0"
-description = "Home Assistant custom integration for the Lydbro One BeoRemote bridge"
+description = "Home Assistant custom integration for the Lydbro One Beoremote bridge"
 requires-python = ">=3.13"
 
 # This project is distributed via HACS, not PyPI — there is no wheel.

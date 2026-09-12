@@ -1,6 +1,6 @@
 """Device triggers — the point-and-click automation UX.
 
-Without these, a user who wants "run my script when the BeoRemote Play
+Without these, a user who wants "run my script when the Beoremote Play
 button is held" has to write YAML that matches an event entity by ID
 and filters attributes by hand. With them, HA's automation editor shows
 a dropdown per Lydbro device:

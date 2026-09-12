@@ -39,7 +39,7 @@ NUMERIC_STATE_KEYS: Final = ("battery",)
 # binary sensor once stayed on for a day after the remote disconnected.
 BOOL_STATE_KEYS: Final = ("ble_connected", "eth_up", "safe_mode")
 
-# BeoRemote One button names — canonical set matching hid_client.h output.
+# Beoremote One button names — canonical set matching hid_client.h output.
 # Firmware publishes exactly these names; unknown names from the server are
 # handled gracefully by the event entity (ignored, not an error).
 KNOWN_BUTTONS: Final = (
@@ -98,7 +98,7 @@ BUTTON_KINDS: Final = ("click", "hold", "release", "double")
 # Remote modes published in the "mode" field
 REMOTE_MODES: Final = ("MUSIC", "TV", "RADIO", "HOMEMEDIA", "GAMES", "CONTROL")
 
-# All BeoRemote buttons exposed as individual HA `button` entities.
+# All Beoremote buttons exposed as individual HA `button` entities.
 # Disabled by default — enable the ones you want from the HA device
 # page and drag them onto a Lovelace card. Mirrors KNOWN_BUTTONS exactly.
 COMMON_REMOTE_BUTTONS: Final = KNOWN_BUTTONS

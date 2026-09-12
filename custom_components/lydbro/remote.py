@@ -1,10 +1,10 @@
-"""Remote platform — a HA-native view of the BeoRemote One.
+"""Remote platform — a HA-native view of the Beoremote One.
 
-Exposes the paired BeoRemote as ``remote.lydbro_one``:
+Exposes the paired Beoremote as ``remote.lydbro_one``:
 
   * ``is_on`` tracks the BLE link state — you know from HA whether the
     remote is currently paired and reachable.
-  * ``remote.send_command`` fires a virtual BeoRemote key press at the
+  * ``remote.send_command`` fires a virtual Beoremote key press at the
     bridge. Useful for automations that want to simulate a button
     without the physical remote (e.g. "on sunset, trigger Play").
 
@@ -40,7 +40,7 @@ async def async_setup_entry(
 
 
 class LydbroRemote(LydbroEntity, RemoteEntity):
-    """Virtual BeoRemote One exposed as a HA remote entity."""
+    """Virtual Beoremote One exposed as a HA remote entity."""
 
     _attr_translation_key = "remote"
     _attr_supported_features = RemoteEntityFeature(0)
@@ -51,7 +51,7 @@ class LydbroRemote(LydbroEntity, RemoteEntity):
 
     @property
     def is_on(self) -> bool:
-        """On when the BeoRemote is paired and the BLE link is up."""
+        """On when the Beoremote is paired and the BLE link is up."""
         return bool(self.coordinator.state.get("ble_connected"))
 
     @property

@@ -1,6 +1,6 @@
 send_remote_key:
   name: Send remote key
-  description: Inject a virtual BeoRemote One key press on the bridge's bus. Automations can use this to fire the same flow as a real button press.
+  description: Inject a virtual Beoremote One key press on the bridge's bus. Automations can use this to fire the same flow as a real button press.
   fields:
     device_id:
       name: Device
@@ -17,7 +17,7 @@ send_remote_key:
 
 tv_send_key:
   name: Send TV key
-  description: Send a key directly to the configured TV, bypassing the BeoRemote event bus. Works in any remote mode — no need to switch the remote to TV mode first.
+  description: Send a key directly to the configured TV, bypassing the Beoremote event bus. Works in any remote mode — no need to switch the remote to TV mode first.
   fields:
     device_id:
       name: Device

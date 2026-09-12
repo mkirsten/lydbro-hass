@@ -1,4 +1,4 @@
-"""Event platform — BeoRemote One button, menu, and scene events.
+"""Event platform — Beoremote One button, menu, and scene events.
 
 Three event entities are created per device:
   * ``event.<device>_button``  — every physical button press. The
@@ -75,7 +75,7 @@ class _LydbroEventBase(LydbroEntity, EventEntity):
 
 
 class LydbroButtonEvent(_LydbroEventBase):
-    """Physical BeoRemote One button presses."""
+    """Physical Beoremote One button presses."""
 
     _attr_device_class = EventDeviceClass.BUTTON
 
@@ -137,7 +137,7 @@ class LydbroMenuEvent(_LydbroEventBase):
 
 
 class LydbroSceneEvent(_LydbroEventBase):
-    """The four corner scene buttons on the BeoRemote One.
+    """The four corner scene buttons on the Beoremote One.
 
     Positions match the physical layout and the strings the firmware
     publishes in ``scene.position``: top_left / top_right / bottom_left /

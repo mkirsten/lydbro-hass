@@ -1,7 +1,7 @@
 blueprint:
-  name: BeoRemote One → Media Player
+  name: Beoremote One → Media Player
   description: >
-    Wire your Bang & Olufsen BeoRemote One to any Home Assistant
+    Wire your Bang & Olufsen Beoremote One to any Home Assistant
     media_player entity. Volume, transport, mute and the four digit
     presets are mapped one-to-one; the remote's TV/Music mode is
     respected so the same buttons can drive different players.
@@ -24,7 +24,7 @@ blueprint:
     mode_filter:
       name: Only react in this remote mode
       description: >
-        Restrict to presses while the BeoRemote is in this mode.
+        Restrict to presses while the Beoremote is in this mode.
         Leave as "any" to react in any mode.
       default: any
       selector:

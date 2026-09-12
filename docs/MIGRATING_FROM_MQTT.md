@@ -14,7 +14,7 @@ native integration.
   firmware version all show up as HA entities — no template sensors to
   hand-maintain.
 - **Device triggers.** The automation editor shows a per-button
-  dropdown (*"BeoRemote → Play button held"*) instead of requiring you
+  dropdown (*"Beoremote → Play button held"*) instead of requiring you
   to hand-filter MQTT payloads.
 - **Services.** `remote.send_command` and `lydbro.send_remote_key`
   are typed and discoverable in Developer Tools. (The bridge drives
@@ -40,7 +40,7 @@ The MQTT payload on `lydbro-one/out` → the native HA bus events:
 The integration fires three Home Assistant bus events — listen to
 these from your automation triggers:
 
-- **`lydbro_button`** — fired on every physical BeoRemote button
+- **`lydbro_button`** — fired on every physical Beoremote button
   press. `event_data`: `device_id`, `name`, `kind`, `mode`, `ts`.
 - **`lydbro_menu`** — fired on vendor-menu selections. `event_data`:
   `device_id`, `name`, `source`, `id`, `mode`, `ts`.

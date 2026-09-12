@@ -5,7 +5,7 @@ users see them without having to trawl through logs:
 
 * **safe_mode** — the bridge entered safe mode (crash loop). Severity
   ``error``. Clears when safe_mode drops back to False.
-* **low_battery** — the BeoRemote One's battery is below
+* **low_battery** — the Beoremote One's battery is below
   :data:`LOW_BATTERY_THRESHOLD` percent. Severity ``warning``. Uses
   hysteresis (must recover past :data:`LOW_BATTERY_CLEAR`) so a
   remote bouncing around the threshold doesn't flap the issue on
@@ -64,7 +64,7 @@ class LydbroIssueMonitor:
         self._check_safe_mode(state)
         self._check_low_battery(state)
         # Clear any lingering issue from older versions that raised a
-        # repair when the BLE link stayed down. The BeoRemote One
+        # repair when the BLE link stayed down. The Beoremote One
         # normally disconnects when idle so that notification was noise.
         ir.async_delete_issue(
             self._hass,

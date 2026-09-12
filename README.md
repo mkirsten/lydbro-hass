@@ -12,7 +12,7 @@
 </p>
 
 Native Home Assistant integration for [Lydbro](https://lydbro.com) devices —
-control and automate your Bang & Olufsen BeoRemote One through a **Lydbro One**
+control and automate your Bang & Olufsen Beoremote One through a **Lydbro One**
 bridge.
 
 Local, push-based, no cloud, no polling, no YAML required. Declared
@@ -47,7 +47,7 @@ over loopback on every push.
 
 ## What this integration gives you
 
-The moment you press a button on your BeoRemote One, Home Assistant knows
+The moment you press a button on your Beoremote One, Home Assistant knows
 about it. Latency is on the order of the TCP round-trip on your LAN —
 typically under 50 ms. Events arrive over a single persistent TCP
 connection; commands flow back through the same socket.
@@ -61,16 +61,16 @@ connection; commands flow back through the same socket.
 | `event` | **Button** | Fires on every physical press. `event_type` is the button name (`Play`, `Next`, `Home`…); `kind` (`click` / `hold` / `release` / `double`) and `mode` (`MUSIC` / `TV` / …) come through as attributes. |
 | `event` | **Menu** | Fires when the user picks an item from the remote's vendor menu. `name` and `source` identify the menu and item. |
 | `event` | **Scene** | Fires when one of the four corner scene buttons is pressed. `event_type` is the physical position: `top_left`, `top_right`, `bottom_left`, `bottom_right`. |
-| `sensor` | BeoRemote battery | Battery % of the paired BeoRemote One (device class `battery`). |
+| `sensor` | Beoremote battery | Battery % of the paired Beoremote One (device class `battery`). |
 | `sensor` | Boot phase | Diagnostic — what the bridge is doing during startup. |
 | `sensor` | Firmware | Reported firmware version of the bridge. |
-| `binary_sensor` | BeoRemote link | `connectivity` — is a BeoRemote currently paired over BLE. |
+| `binary_sensor` | Beoremote link | `connectivity` — is a Beoremote currently paired over BLE. |
 | `binary_sensor` | Ethernet | Diagnostic. |
 | `binary_sensor` | Safe mode | `problem` — fires if the bridge has entered crash-loop safe mode. |
 | `button` | Reboot | Reboot the bridge. |
 | `button` | Rescan discovery | Trigger an mDNS rescan for Sonos / TVs / HA on the LAN. |
-| `button` | Disconnect BeoRemote | Drop the BLE link and re-pair. |
-| `remote` | BeoRemote | Virtual remote — `remote.send_command` fires a BeoRemote key press without needing the physical remote. `is_on` tracks the BLE link. |
+| `button` | Disconnect Beoremote | Drop the BLE link and re-pair. |
+| `remote` | Beoremote | Virtual remote — `remote.send_command` fires a Beoremote key press without needing the physical remote. `is_on` tracks the BLE link. |
 
 **Disabled by default** — enable the ones you need from the device
 page in HA. They're off by default so the device card stays
@@ -79,10 +79,10 @@ don't need dashboard wiring:
 
 | Platform | Entity | Notes |
 |---|---|---|
-| `sensor` | Last button press | Timestamp (`device_class: timestamp`) of the most recent BeoRemote press, with `name` / `kind` / `mode` as attributes. Perfect for a "last activity" card. |
+| `sensor` | Last button press | Timestamp (`device_class: timestamp`) of the most recent Beoremote press, with `name` / `kind` / `mode` as attributes. Perfect for a "last activity" card. |
 | `sensor` | Current mode | Enum (`music` / `tv` / `radio` / `homemedia` / `games` / `control`). Tracks whichever mode the remote was last observed in. Good for dashboard conditionals — show different cards based on what the user is doing. |
 | `sensor` | IP address | Diagnostic — the bridge's LAN address, for when you need to open its web UI from an automation. |
-| `button` | Play / Pause / Next / Fast Forward / Rewind / Volume Up / Volume Down / Mute / Power / Up / Down / Left / Right / Select / Menu / Back / Home / Info / Guide / Music / TV / List / Channel Up / Channel Down / Red / Green / Yellow / Blue / 0–9 | One virtual remote-key button per canonical BeoRemote One event. Pressing each fires `send_remote_key` with the matching key, so you can drag e.g. **Play** onto a Lovelace card without scripting. |
+| `button` | Play / Pause / Next / Fast Forward / Rewind / Volume Up / Volume Down / Mute / Power / Up / Down / Left / Right / Select / Menu / Back / Home / Info / Guide / Music / TV / List / Channel Up / Channel Down / Red / Green / Yellow / Blue / 0–9 | One virtual remote-key button per canonical Beoremote One event. Pressing each fires `send_remote_key` with the matching key, so you can drag e.g. **Play** onto a Lovelace card without scripting. |
 
 ### Device triggers
 
@@ -102,15 +102,15 @@ For the things that benefit from structured arguments, the integration
 also registers a set of services. All of them take a `device_id` so you
 can target a specific bridge when you run more than one:
 
-- `lydbro.send_remote_key` — inject a virtual BeoRemote key press
+- `lydbro.send_remote_key` — inject a virtual Beoremote key press
 
-Bridge-level admin actions (**Reboot**, **Reset BeoRemote
-pairing**, **Disconnect BeoRemote**) are exposed as `button`
+Bridge-level admin actions (**Reboot**, **Reset Beoremote
+pairing**, **Disconnect Beoremote**) are exposed as `button`
 entities on the device page rather than services — they're one-off
 actions, not automation inputs.
 
 The integration deliberately does **not** expose TV / Sonos control
-services. The Lydbro One is a bridge *from* the BeoRemote to Sonos /
+services. The Lydbro One is a bridge *from* the Beoremote to Sonos /
 TVs / HA — Home Assistant already talks to Sonos and your TV
 directly, so routing those commands through the ESP32 would be a
 detour with no upside. Drive Sonos and TVs from their own HA
@@ -138,16 +138,16 @@ new connection.
 
 What people actually build with this:
 
-- **BeoRemote One → Sonos**. Play / Pause / Next / Rewind / Vol
+- **Beoremote One → Sonos**. Play / Pause / Next / Rewind / Vol
   Up / Vol Down mapped to the currently-selected Sonos zone. The
   bundled [`blueprints/beoremote_media_player.yaml`](blueprints/beoremote_media_player.yaml)
   wires this up in one click.
-- **BeoRemote One → Samsung Frame TV**. In `TV` mode the bridge
+- **Beoremote One → Samsung Frame TV**. In `TV` mode the bridge
   drives the Frame directly (Tizen WebSocket from the ESP32); in
   `MUSIC` mode the same buttons drive Sonos instead. Both paths run
   on the device — HA just sees the resulting button events.
 - **Corner scene buttons → light scenes**. The four corner
-  "scene" buttons on the BeoRemote trigger four different Home
+  "scene" buttons on the Beoremote trigger four different Home
   Assistant scenes, good for "movie mode" / "reading" / "party" /
   "off".
 - **Ambient automation triggers**. Low battery, BLE disconnect,
@@ -167,7 +167,7 @@ wild.
 | **Lydbro One** | ≥ `0.11.9.3` | Fully supported (active development target) |
 
 The Lydbro One is the ESP32-based bridge with PoE Ethernet + BLE
-that pairs with a Bang & Olufsen BeoRemote One — the Bluetooth remote
+that pairs with a Bang & Olufsen Beoremote One — the Bluetooth remote
 B&O ships with Beolink Multiroom, Beosound and Beovision products, and
 a popular upgrade for owners of older Beolink / Masterlink era systems
 who want their B&O remote driving the rest of the smart home. Earlier
@@ -292,14 +292,14 @@ you hit something weird, upgrade both sides to the same row.
 
 ## Automation examples
 
-### "Play" button on the BeoRemote → resume Sonos
+### "Play" button on the Beoremote → resume Sonos
 
 Simple event-entity trigger. No kind filter, so this fires on clicks,
 holds and doubles alike:
 
 ```yaml
 automation:
-  - alias: BeoRemote Play resumes Sonos
+  - alias: Beoremote Play resumes Sonos
     triggers:
       - trigger: state
         entity_id: event.lab_beoremote_one_button
@@ -318,7 +318,7 @@ directly so you can filter on `kind` in `event_data`:
 
 ```yaml
 automation:
-  - alias: BeoRemote Red hold → good night
+  - alias: Beoremote Red hold → good night
     triggers:
       - trigger: event
         event_type: lydbro_button
@@ -338,7 +338,7 @@ Automations UI:
 
 ```yaml
 automation:
-  - alias: BeoRemote top-left scene → movie mode
+  - alias: Beoremote top-left scene → movie mode
     triggers:
       - trigger: state
         entity_id: event.lab_beoremote_one_scene
@@ -366,7 +366,7 @@ dashboards or automations needed:
 - **Safe mode** (severity `error`) — the bridge rebooted into safe
   mode after repeated crashes. The notification includes a link to
   the bridge's web UI so you can fix the configuration and reboot.
-- **Low battery** (severity `warning`) — the paired BeoRemote One
+- **Low battery** (severity `warning`) — the paired Beoremote One
   is at or below 10%. Hysteresis: the notification clears once the
   battery recovers past 15%, so a remote bouncing around the
   threshold doesn't flap the notification on and off.
@@ -432,7 +432,7 @@ LAN IPs of discovered Sonos / TVs) so you don't need to redact.
   manually by IP via **+ Add Integration → Lydbro** and the flow
   will probe it the same way.
 - **BLE is single-remote.** The Lydbro One pairs with exactly one
-  BeoRemote One at a time. Running two remotes into one bridge
+  Beoremote One at a time. Running two remotes into one bridge
   isn't a software limitation this integration can fix — it's a
   bridge-side constraint.
 - **No translation beyond English yet.** The entity, error and
