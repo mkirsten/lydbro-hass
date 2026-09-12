@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" alt="Lydbro" width="96" height="96">
+  <img src="https://raw.githubusercontent.com/mkirsten/lydbro-hass/main/logo.svg" alt="Lydbro" width="96" height="96">
 </p>
 
 <h1 align="center">Lydbro for Home Assistant</h1>
