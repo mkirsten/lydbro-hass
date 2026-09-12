@@ -279,7 +279,7 @@ fast with a readable error rather than silently garbling events.
 
 | lydbro-hass | Lydbro One FW | Protocol |
 |-------------|---------------|----------|
-| 0.2.7+      | 1.0.0 – 1.0.8 | v2       |
+| 1.0.0+      | 1.0.0 – 1.0.8 | v2       |
 | 0.2.6       | 1.0.0+        | v2       |
 | 0.2.x       | 0.13.0 – 0.57.x | v2     |
 | 0.1.x       | 0.11.9.3 – 0.12.4 | v1   |

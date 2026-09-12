@@ -2,7 +2,11 @@
 
 All notable changes to this integration are documented here.
 
-## [0.2.7] - 2026-09-12
+## [1.0.0] - 2026-09-12
+
+First stable release. The integration has been running against the
+1.0 firmware since its first customer unit shipped, and the version
+now says so.
 
 - Fix: the "Beoremote link" binary sensor (and the battery sensor's
   availability, which follows it) stayed on after the remote
