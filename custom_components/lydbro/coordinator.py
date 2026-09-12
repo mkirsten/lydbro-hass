@@ -18,6 +18,7 @@ from .const import (
     EVENT_BUS_BUTTON,
     EVENT_BUS_MENU,
     EVENT_BUS_SCENE,
+    BOOL_STATE_KEYS,
     NUMERIC_STATE_KEYS,
     SIGNAL_CONNECTION,
     SIGNAL_EVENT,
@@ -53,8 +54,23 @@ def _coerce_numeric(key: str, value: Any) -> Any:
     return value
 
 
+def _coerce_bool(key: str, value: Any) -> Any:
+    """Turn the "true" / "false" strings of a state_change delta into bools.
+
+    Full ``state`` snapshots already carry JSON booleans and pass
+    through untouched. Anything else (None, ints) is left alone as well.
+    """
+    if key not in BOOL_STATE_KEYS or not isinstance(value, str):
+        return value
+    return value.strip().lower() in ("true", "1", "on")
+
+
+def _coerce_value(key: str, value: Any) -> Any:
+    return _coerce_bool(key, _coerce_numeric(key, value))
+
+
 def _normalize_state(snapshot: dict[str, Any]) -> dict[str, Any]:
-    return {k: _coerce_numeric(k, v) for k, v in snapshot.items()}
+    return {k: _coerce_value(k, v) for k, v in snapshot.items()}
 
 
 class LydbroCoordinator:
@@ -185,7 +201,7 @@ class LydbroCoordinator:
             name = frame.get("name")
             value = frame.get("value")
             if isinstance(name, str):
-                self.state[name] = _coerce_numeric(name, value)
+                self.state[name] = _coerce_value(name, value)
                 state_touched = True
                 self._issue_monitor.evaluate()
 

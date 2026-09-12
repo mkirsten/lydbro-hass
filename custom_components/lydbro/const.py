@@ -33,6 +33,12 @@ EVENT_BUS_SCENE: Final = "lydbro_scene"
 # full snapshots (ints) and state_change deltas (strings).
 NUMERIC_STATE_KEYS: Final = ("battery",)
 
+# Keys in the state dict whose values must be booleans. Full snapshots
+# carry real JSON booleans; state_change deltas carry the strings
+# "true" / "false", and bool("false") is True, which is how the link
+# binary sensor once stayed on for a day after the remote disconnected.
+BOOL_STATE_KEYS: Final = ("ble_connected", "eth_up", "safe_mode")
+
 # BeoRemote One button names — canonical set matching hid_client.h output.
 # Firmware publishes exactly these names; unknown names from the server are
 # handled gracefully by the event entity (ignored, not an error).

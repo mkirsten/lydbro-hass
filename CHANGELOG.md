@@ -2,6 +2,15 @@
 
 All notable changes to this integration are documented here.
 
+## [0.2.7] - 2026-09-12
+
+- Fix: the "Beoremote link" binary sensor (and the battery sensor's
+  availability, which follows it) stayed on after the remote
+  disconnected. Pushed state changes carry booleans as the strings
+  "true" / "false", and the string "false" was being read as true.
+  Only a full snapshot after an HA reconnect ever corrected it.
+  Boolean state keys are now coerced the same way numeric ones are.
+
 ## [0.2.6] — 2026-07-04
 
 Discoverability release for the HACS default-store submission.

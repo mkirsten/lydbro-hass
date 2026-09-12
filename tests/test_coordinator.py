@@ -111,6 +111,28 @@ async def test_battery_string_delta_coerced_to_int(
     assert isinstance(coordinator.state["battery"], int)
 
 
+async def test_bool_string_delta_coerced_to_bool(
+    hass: HomeAssistant, fake_server: FakeLydbroServer
+) -> None:
+    """Firmware delta frames send booleans as strings; "false" must read as False.
+
+    Seen live 2026-09-11: the remote disconnected, the bridge pushed
+    ble_connected="false", and the link binary sensor stayed on for a
+    day because bool("false") is True. Only a full snapshot after an HA
+    reconnect ever corrected it.
+    """
+    _, coordinator = await _setup(hass, fake_server)
+
+    await fake_server.push_event("state_change", name="ble_connected", value="false")
+    await _wait_for(lambda: coordinator.state["ble_connected"] is False)
+
+    await fake_server.push_event("state_change", name="ble_connected", value="true")
+    await _wait_for(lambda: coordinator.state["ble_connected"] is True)
+
+    await fake_server.push_event("state_change", name="eth_up", value="false")
+    await _wait_for(lambda: coordinator.state["eth_up"] is False)
+
+
 async def test_boot_phase_event_updates_state(
     hass: HomeAssistant, fake_server: FakeLydbroServer
 ) -> None:
