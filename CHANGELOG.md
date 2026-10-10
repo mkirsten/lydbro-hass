@@ -2,6 +2,14 @@
 
 All notable changes to this integration are documented here.
 
+## [1.0.2] - 2026-10-10
+
+- Ready for Home Assistant 2027.8: the device lookup behind Beoremote
+  button, scene and menu events now uses the config-entry-scoped
+  registry API added in HA 2026.8, so HA 2026.9+ no longer logs a
+  deprecation warning. Older HA versions keep using the previous
+  lookup. No behaviour change.
+
 ## [1.0.1] - 2026-09-12
 
 - The logo at the top of the README now shows in the HACS repository
